@@ -16,6 +16,41 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [requires2FA, setRequires2FA] = useState(false);
 
+  // Helper function to wait until google is loaded via load/error event flags
+  const waitForGoogle = () => {
+    return new Promise((resolve, reject) => {
+      const timeout = 15000; // 15 seconds timeout
+      const intervalTime = 100;
+      let elapsedTime = 0;
+
+      if (window.googleApiLoaded) {
+        resolve();
+        return;
+      }
+
+      if (window.googleApiLoadFailed) {
+        reject(new Error('Google API failed to load'));
+        return;
+      }
+
+      const interval = setInterval(() => {
+        if (window.googleApiLoaded) {
+          clearInterval(interval);
+          resolve();
+        } else if (window.googleApiLoadFailed) {
+          clearInterval(interval);
+          reject(new Error('Google API failed to load'));
+        } else {
+          elapsedTime += intervalTime;
+          if (elapsedTime >= timeout) {
+            clearInterval(interval);
+            reject(new Error('Google API load timed out'));
+          }
+        }
+      }, intervalTime);
+    });
+  };
+
   useEffect(() => {
     // Check for stored auth on mount
     const storedUser = localStorage.getItem('user');
@@ -130,11 +165,93 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const googleLogin = async () => {
+    setLoading(true);
+    try {
+      await waitForGoogle();
+
+      return new Promise((resolve, reject) => {
+        const client = google.accounts.oauth2.initTokenClient({
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+          scope: 'openid email profile',
+          callback: async (response) => {
+            if (response.access_token) {
+              try {
+                const apiResponse = await apiService.googleLogin({ token: response.access_token });
+                if (apiResponse.token && apiResponse.user) {
+                  const userData = apiResponse.user;
+                  setUser(userData);
+                  apiService.setAuthToken(apiResponse.token);
+                  localStorage.setItem('user', JSON.stringify(userData));
+                  localStorage.setItem('authToken', apiResponse.token);
+                  resolve({ success: true, user: userData });
+                  return;
+                }
+                resolve({ success: false, error: 'Google login failed' });
+              } catch (error) {
+                resolve({ success: false, error: error.message });
+              }
+            } else {
+              resolve({ success: false, error: 'Google login failed' });
+            }
+          },
+        });
+        client.requestAccessToken();
+      });
+    } catch (error) {
+      return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const googleSignup = async () => {
+    setLoading(true);
+    try {
+      await waitForGoogle();
+
+      return new Promise((resolve, reject) => {
+        const client = google.accounts.oauth2.initTokenClient({
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+          scope: 'openid email profile',
+          callback: async (response) => {
+            if (response.access_token) {
+              try {
+                const apiResponse = await apiService.googleSignup({ token: response.access_token });
+                if (apiResponse.token && apiResponse.user) {
+                  const userData = apiResponse.user;
+                  setUser(userData);
+                  apiService.setAuthToken(apiResponse.token);
+                  localStorage.setItem('user', JSON.stringify(userData));
+                  localStorage.setItem('authToken', apiResponse.token);
+                  resolve({ success: true, user: userData });
+                  return;
+                }
+                resolve({ success: false, error: 'Google signup failed' });
+              } catch (error) {
+                resolve({ success: false, error: error.message });
+              }
+            } else {
+              resolve({ success: false, error: 'Google signup failed' });
+            }
+          },
+        });
+        client.requestAccessToken();
+      });
+    } catch (error) {
+      return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const value = {
     user,
     login,
     logout,
     signup,
+    googleLogin,
+    googleSignup,
     forgotPassword,
     verify2FA,
     refreshToken,

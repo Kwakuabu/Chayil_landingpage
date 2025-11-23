@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { mockClients, mockIncidents, mockReports, mockSecurityServices } from '../data/mockData';
+import { apiService } from '../services/api';
 
 // Simple icon components as fallback
 const HomeIcon = () => <span>🏠</span>;
@@ -27,10 +27,62 @@ export default function AdminDashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
+  const [clients, setClients] = useState([]);
+  const [incidents, setIncidents] = useState([]);
+  const [reports, setReports] = useState([]);
+  const [securityServices, setSecurityServices] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchAllData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const [clientsData, incidentsData, reportsData, securityServicesData] = await Promise.all([
+          apiService.getClients(),
+          apiService.getIncidents(),
+          apiService.getReports(),
+          apiService.getSecurityServices(),
+        ]);
+        setClients(clientsData);
+        setIncidents(incidentsData);
+        setReports(reportsData);
+        setSecurityServices(securityServicesData);
+      } catch (err) {
+        setError('Failed to load dashboard data.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAllData();
+  }, []);
+
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-400" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-red-600">
+        <p>{error}</p>
+        <button className="mt-4 px-4 py-2 bg-teal-600 rounded text-white" onClick={() => window.location.reload()}>
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   const renderDashboard = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -43,7 +95,7 @@ export default function AdminDashboard() {
           <UsersIcon className="h-8 w-8 text-teal-400" />
           <div className="ml-4">
             <p className="text-sm font-medium text-gray-300">Total Clients</p>
-            <p className="text-2xl font-bold text-cyan-300">{mockClients.length}</p>
+            <p className="text-2xl font-bold text-cyan-300">{clients.length}</p>
           </div>
         </div>
       </motion.div>
@@ -59,7 +111,7 @@ export default function AdminDashboard() {
           <div className="ml-4">
             <p className="text-sm font-medium text-gray-300">Active Incidents</p>
             <p className="text-2xl font-bold text-red-300">
-              {mockIncidents.filter(i => i.status !== 'Resolved').length}
+              {incidents.filter(i => i.status !== 'Resolved').length}
             </p>
           </div>
         </div>
@@ -75,7 +127,7 @@ export default function AdminDashboard() {
           <DocumentTextIcon className="h-8 w-8 text-blue-400" />
           <div className="ml-4">
             <p className="text-sm font-medium text-gray-300">Reports Generated</p>
-            <p className="text-2xl font-bold text-blue-300">{mockReports.length}</p>
+            <p className="text-2xl font-bold text-blue-300">{reports.length}</p>
           </div>
         </div>
       </motion.div>
@@ -90,7 +142,7 @@ export default function AdminDashboard() {
           <ShieldCheckIcon className="h-8 w-8 text-green-400" />
           <div className="ml-4">
             <p className="text-sm font-medium text-gray-300">Services Active</p>
-            <p className="text-2xl font-bold text-green-300">{mockSecurityServices.length}</p>
+            <p className="text-2xl font-bold text-green-300">{securityServices.length}</p>
           </div>
         </div>
       </motion.div>
@@ -113,7 +165,7 @@ export default function AdminDashboard() {
             </tr>
           </thead>
           <tbody className="divide-y divide-teal-500/10">
-            {mockClients.map((client) => (
+            {clients.map((client) => (
               <tr key={client.id} className="hover:bg-gray-800/30">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div>
@@ -123,11 +175,10 @@ export default function AdminDashboard() {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{client.industry}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    client.status === 'Active'
+                  <span className={'inline-flex px-2 py-1 text-xs font-semibold rounded-full ' +
+                    (client.status === 'Active'
                       ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
-                  }`}>
+                      : 'bg-red-100 text-red-800')}>
                     {client.status}
                   </span>
                 </td>
@@ -156,7 +207,7 @@ export default function AdminDashboard() {
             </tr>
           </thead>
           <tbody className="divide-y divide-teal-500/10">
-            {mockIncidents.map((incident) => (
+            {incidents.map((incident) => (
               <tr key={incident.id} className="hover:bg-gray-800/30">
                 <td className="px-6 py-4">
                   <div>
@@ -166,20 +217,18 @@ export default function AdminDashboard() {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{incident.clientName}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    incident.severity === 'Critical' ? 'bg-red-100 text-red-800' :
+                  <span className={'inline-flex px-2 py-1 text-xs font-semibold rounded-full ' +
+                    (incident.severity === 'Critical' ? 'bg-red-100 text-red-800' :
                     incident.severity === 'High' ? 'bg-orange-100 text-orange-800' :
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
+                    'bg-yellow-100 text-yellow-800')}>
                     {incident.severity}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    incident.status === 'Resolved' ? 'bg-green-100 text-green-800' :
+                  <span className={'inline-flex px-2 py-1 text-xs font-semibold rounded-full ' +
+                    (incident.status === 'Resolved' ? 'bg-green-100 text-green-800' :
                     incident.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`}>
+                    'bg-gray-100 text-gray-800')}>
                     {incident.status}
                   </span>
                 </td>
@@ -198,7 +247,7 @@ export default function AdminDashboard() {
       </div>
       <div className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {mockReports.map((report) => (
+          {reports.map((report) => (
             <div key={report.id} className="bg-gray-800/50 p-4 rounded-lg border border-teal-500/10">
               <h4 className="text-sm font-medium text-cyan-300 mb-2">{report.title}</h4>
               <p className="text-xs text-gray-400 mb-2">{report.type} - {report.period}</p>
@@ -224,7 +273,7 @@ export default function AdminDashboard() {
       </div>
       <div className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mockSecurityServices.map((service) => (
+          {securityServices.map((service) => (
             <div key={service.id} className="bg-gray-800/50 p-4 rounded-lg border border-teal-500/10">
               <div className="flex items-center mb-3">
                 <ShieldCheckIcon className="h-6 w-6 text-teal-400 mr-2" />

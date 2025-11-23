@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { mockIncidents } from '../data/mockData';
 import ReportIncidentForm from '../components/client/ReportIncidentForm';
+import { apiService } from '../services/api';
 
 // Simple icon components as fallback
 const HomeIcon = () => <span>🏠</span>;
@@ -31,17 +31,36 @@ export default function ClientIncidents() {
   const [filterStatus, setFilterStatus] = useState('All');
   const [filterSeverity, setFilterSeverity] = useState('All');
   const [showReportForm, setShowReportForm] = useState(false);
-  const [incidents, setIncidents] = useState(mockIncidents);
+  const [incidents, setIncidents] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchIncidents = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await apiService.getClientIncidents();
+        setIncidents(data);
+      } catch (err) {
+        setError('Failed to load incidents');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchIncidents();
+  }, []);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  // Filter incidents for the current client
-  const clientIncidents = incidents.filter(incident => incident.client === 'TechCorp Inc');
+  const clientIncidents = incidents.filter(incident => incident.client === user?.company);
 
   const filteredIncidents = clientIncidents.filter(incident => {
     const statusMatch = filterStatus === 'All' || incident.status === filterStatus;
@@ -395,10 +414,15 @@ export default function ClientIncidents() {
       <ReportIncidentForm
         isOpen={showReportForm}
         onClose={() => setShowReportForm(false)}
-        onSubmit={(incidentData) => {
-          // Add the new incident to the state
-          setIncidents(prevIncidents => [...prevIncidents, incidentData]);
-          setShowReportForm(false);
+        onSubmit={async (incidentData) => {
+          try {
+            // Call API to report new incident
+            const createdIncident = await apiService.reportIncident(incidentData);
+            setIncidents(prevIncidents => [...prevIncidents, createdIncident]);
+            setShowReportForm(false);
+          } catch (error) {
+            console.error('Failed to report incident:', error);
+          }
         }}
       />
     </div>

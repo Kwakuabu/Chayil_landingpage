@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import ClientTable from '../components/admin/ClientTable';
 import ClientDetailModal from '../components/admin/ClientDetailModal';
 import AddClientForm from '../components/admin/AddClientForm';
-import { mockClients } from '../data/mockData';
 import { apiService } from '../services/api';
 
 export default function AdminClients() {
@@ -20,11 +19,11 @@ export default function AdminClients() {
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        // In production, this would be: const data = await apiService.getClients();
-        setClients(mockClients);
+        const data = await apiService.getClients();
+        setClients(data);
       } catch (error) {
         console.error('Failed to fetch clients:', error);
-        setClients(mockClients); // Fallback to mock data
+        setClients([]); // Clear clients on error
       } finally {
         setLoading(false);
       }
@@ -44,7 +43,7 @@ export default function AdminClients() {
 
   const handleSaveClient = async (updatedClient) => {
     try {
-      // In production: await apiService.updateClient(updatedClient);
+      await apiService.updateClient(updatedClient);
       setClients(prev => prev.map(client =>
         client.id === updatedClient.id ? updatedClient : client
       ));
@@ -58,7 +57,7 @@ export default function AdminClients() {
   const handleDeleteClient = async (client) => {
     if (window.confirm(`Are you sure you want to delete ${client.name}? This action cannot be undone.`)) {
       try {
-        // In production: await apiService.deleteClient(client.id);
+        await apiService.deleteClient(client.id);
         setClients(prev => prev.filter(c => c.id !== client.id));
         setIsDetailModalOpen(false);
         setSelectedClient(null);
@@ -70,8 +69,8 @@ export default function AdminClients() {
 
   const handleAddNewClient = async (newClient) => {
     try {
-      // In production: const createdClient = await apiService.createClient(newClient);
-      setClients(prev => [...prev, newClient]);
+      const createdClient = await apiService.createClient(newClient);
+      setClients(prev => [...prev, createdClient]);
       setIsAddFormOpen(false);
     } catch (error) {
       console.error('Failed to add client:', error);

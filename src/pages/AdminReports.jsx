@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiTrendingUp, FiShield, FiClock, FiUsers } from 'react-icons/fi';
 import ThreatChart from '../components/admin/ThreatChart';
 import ReportFilters from '../components/admin/ReportFilters';
 import ReportExportButton from '../components/admin/ReportExportButton';
-import { mockReportsData } from '../data/mockData';
+import { apiService } from '../services/api';
 
 const AdminReports = () => {
   const [filters, setFilters] = useState({
@@ -13,23 +13,46 @@ const AdminReports = () => {
     status: 'all'
   });
   const [isExporting, setIsExporting] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [reportData, setReportData] = useState({
+    threatTrends: [],
+    clientSecurityScores: [],
+    incidentResponseTimes: [],
+    stats: {
+      totalThreats: 0,
+      activeIncidents: 0,
+      avgResponseTime: '',
+      protectedClients: 0
+    }
+  });
+
+  const fetchReportData = async (appliedFilters) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await apiService.getReports(appliedFilters);
+      setReportData(data);
+    } catch (err) {
+      setError('Failed to load reports');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchReportData(filters);
+  }, [filters]);
 
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
-    // In a real app, this would trigger API calls to fetch filtered data
-    console.log('Filters updated:', newFilters);
   };
 
   const handleExport = async (format) => {
     setIsExporting(true);
     try {
-      // Simulate export process
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // In a real app, this would generate and download the report
-      console.log(`Exporting report in ${format} format`);
-
-      // Show success message or trigger download
+      await apiService.exportReport(format, filters);
       alert(`Report exported successfully as ${format.toUpperCase()}`);
     } catch (error) {
       console.error('Export failed:', error);
@@ -42,15 +65,15 @@ const AdminReports = () => {
   const statsCards = [
     {
       title: 'Total Threats',
-      value: '1,247',
-      change: '+12.5%',
+      value: reportData.stats.totalThreats.toLocaleString(),
+      change: '+12.5%', 
       changeType: 'increase',
       icon: FiShield,
       color: 'text-red-600'
     },
     {
       title: 'Active Incidents',
-      value: '23',
+      value: reportData.stats.activeIncidents.toLocaleString(),
       change: '-8.2%',
       changeType: 'decrease',
       icon: FiTrendingUp,
@@ -58,7 +81,7 @@ const AdminReports = () => {
     },
     {
       title: 'Avg Response Time',
-      value: '4.2h',
+      value: reportData.stats.avgResponseTime,
       change: '+2.1%',
       changeType: 'increase',
       icon: FiClock,
@@ -66,7 +89,7 @@ const AdminReports = () => {
     },
     {
       title: 'Protected Clients',
-      value: '156',
+      value: reportData.stats.protectedClients.toLocaleString(),
       change: '+5.7%',
       changeType: 'increase',
       icon: FiUsers,
@@ -74,10 +97,28 @@ const AdminReports = () => {
     }
   ];
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-400" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-red-600">
+        <p>{error}</p>
+        <button className="mt-4 px-4 py-2 bg-teal-600 rounded text-white" onClick={() => fetchReportData(filters)}>
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Reports & Analytics</h1>
           <p className="mt-2 text-gray-600 dark:text-gray-400">
@@ -85,13 +126,11 @@ const AdminReports = () => {
           </p>
         </div>
 
-        {/* Filters */}
         <ReportFilters
           onFilterChange={handleFilterChange}
           onExport={() => handleExport('pdf')}
         />
 
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {statsCards.map((stat, index) => {
             const IconComponent = stat.icon;
@@ -112,29 +151,23 @@ const AdminReports = () => {
           })}
         </div>
 
-        {/* Charts Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Threat Trends Chart */}
           <div className="lg:col-span-2">
-            <ThreatChart type="line" data={mockReportsData.threatTrends} />
+            <ThreatChart type="line" data={reportData.threatTrends} />
           </div>
 
-          {/* Threat Categories Pie Chart */}
           <ThreatChart type="pie" />
 
-          {/* Severity Distribution Bar Chart */}
           <ThreatChart type="bar" />
         </div>
 
-        {/* Additional Analytics */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Client Security Scores */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Client Security Scores
             </h3>
             <div className="space-y-4">
-              {mockReportsData.clientSecurityScores.map((client, index) => (
+              {reportData.clientSecurityScores.map((client, index) => (
                 <div key={index} className="flex items-center justify-between">
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{client.client}</p>
@@ -156,14 +189,13 @@ const AdminReports = () => {
             </div>
           </div>
 
-          {/* Incident Response Times */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Incident Response Times
             </h3>
             <ThreatChart
               type="line"
-              data={mockReportsData.incidentResponseTimes.map(item => ({
+              data={reportData.incidentResponseTimes.map(item => ({
                 ...item,
                 period: item.period
               }))}
@@ -171,7 +203,6 @@ const AdminReports = () => {
           </div>
         </div>
 
-        {/* Export Options */}
         <div className="mt-8 flex justify-end">
           <ReportExportButton onExport={handleExport} isLoading={isExporting} />
         </div>

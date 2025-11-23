@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { mockReports } from '../data/mockData';
 import ReportCard from '../components/client/ReportCard';
-import DownloadButton from '../components/client/DownloadButton';
+import { apiService } from '../services/api';
 
 // Simple icon components as fallback
 const HomeIcon = () => <span>🏠</span>;
@@ -28,15 +27,36 @@ export default function ClientReports() {
   const [filterType, setFilterType] = useState('All');
   const [filterStatus, setFilterStatus] = useState('All');
   const [downloading, setDownloading] = useState(null);
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await apiService.getClientReports();
+        setReports(data);
+      } catch (err) {
+        setError('Failed to load reports');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReports();
+  }, []);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  const filteredReports = mockReports.filter(report => {
+  const filteredReports = reports.filter(report => {
     const typeMatch = filterType === 'All' || report.type === filterType;
     const statusMatch = filterStatus === 'All' || report.status === filterStatus;
     return typeMatch && statusMatch;
@@ -47,11 +67,10 @@ export default function ClientReports() {
 
     setDownloading(report.id);
 
-    // Simulate download delay
+    // Simulate download delay or implement real file download logic
     setTimeout(() => {
-      // Create a mock download (in real app, this would trigger actual file download)
       const element = document.createElement('a');
-      const file = new Blob([`Mock ${report.title} content`], { type: 'text/plain' });
+      const file = new Blob([`Report: ${report.title}`], { type: 'application/pdf' });
       element.href = URL.createObjectURL(file);
       element.download = `${report.title.replace(/\s+/g, '_')}.pdf`;
       document.body.appendChild(element);
@@ -62,11 +81,27 @@ export default function ClientReports() {
     }, 1500);
   };
 
-  const reportTypes = ['All', ...new Set(mockReports.map(r => r.type))];
+  const reportTypes = ['All', ...new Set(reports.map(r => r.type))];
   const statusOptions = ['All', 'Completed', 'In Progress'];
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-gray-500 dark:text-gray-400">
+        Loading reports...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-500">
+        {error}
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/background2.jpg')" }}>
+    <div className="min-h-screen bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url('${import.meta.env.BASE_URL}background2.jpg')` }}>
       <div className="flex">
         {/* Sidebar */}
         <div className="w-64 bg-gray-900/95 backdrop-blur-md min-h-screen border-r border-teal-500/30 shadow-xl">
@@ -128,7 +163,7 @@ export default function ClientReports() {
                   <DocumentTextIcon className="h-8 w-8 text-blue-400" />
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-300">Total Reports</p>
-                    <p className="text-2xl font-bold text-blue-300">{mockReports.length}</p>
+                    <p className="text-2xl font-bold text-blue-300">{reports.length}</p>
                   </div>
                 </div>
               </motion.div>
@@ -144,7 +179,7 @@ export default function ClientReports() {
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-300">Completed</p>
                     <p className="text-2xl font-bold text-green-300">
-                      {mockReports.filter(r => r.status === 'Completed').length}
+                      {reports.filter(r => r.status === 'Completed').length}
                     </p>
                   </div>
                 </div>
@@ -161,7 +196,7 @@ export default function ClientReports() {
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-300">In Progress</p>
                     <p className="text-2xl font-bold text-blue-300">
-                      {mockReports.filter(r => r.status === 'In Progress').length}
+                      {reports.filter(r => r.status === 'In Progress').length}
                     </p>
                   </div>
                 </div>
@@ -178,7 +213,7 @@ export default function ClientReports() {
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-300">Downloads</p>
                     <p className="text-2xl font-bold text-teal-300">
-                      {mockReports.filter(r => r.status === 'Completed').length}
+                      {reports.filter(r => r.status === 'Completed').length}
                     </p>
                   </div>
                 </div>
@@ -222,6 +257,7 @@ export default function ClientReports() {
                   key={report.id}
                   report={report}
                   onDownload={handleDownload}
+                  downloading={downloading === report.id}
                 />
               ))}
             </div>

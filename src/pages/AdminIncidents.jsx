@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import IncidentTable from '../components/admin/IncidentTable';
 import IncidentDetailDrawer from '../components/admin/IncidentDetailDrawer';
 import IncidentAssignForm from '../components/admin/IncidentAssignForm';
-import { mockIncidents } from '../data/mockData';
 import { apiService } from '../services/api';
 
 export default function AdminIncidents() {
@@ -20,11 +19,11 @@ export default function AdminIncidents() {
   useEffect(() => {
     const fetchIncidents = async () => {
       try {
-        // In production, this would be: const data = await apiService.getIncidents();
-        setIncidents(mockIncidents);
+        const data = await apiService.getIncidents();
+        setIncidents(data);
       } catch (error) {
         console.error('Failed to fetch incidents:', error);
-        setIncidents(mockIncidents); // Fallback to mock data
+        setIncidents([]); // Clear incidents on error
       } finally {
         setLoading(false);
       }
@@ -40,7 +39,7 @@ export default function AdminIncidents() {
 
   const handleStatusUpdate = async (incidentId, newStatus) => {
     try {
-      // In production: await apiService.updateIncidentStatus(incidentId, newStatus);
+      await apiService.updateIncidentStatus(incidentId, newStatus);
       setIncidents(prev => prev.map(incident => {
         if (incident.id === incidentId) {
           const statusMap = {
@@ -63,7 +62,7 @@ export default function AdminIncidents() {
 
   const handleAssignIncident = async (incidentId, assignmentData) => {
     try {
-      // In production: await apiService.assignIncident(incidentId, assignmentData);
+      await apiService.assignIncident(incidentId, assignmentData);
       setIncidents(prev => prev.map(incident => {
         if (incident.id === incidentId) {
           return {

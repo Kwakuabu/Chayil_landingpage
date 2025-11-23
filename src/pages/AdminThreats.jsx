@@ -1,21 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import ThreatFeedTicker from '../components/admin/ThreatFeedTicker';
 import ThreatTable from '../components/admin/ThreatTable';
-import { mockThreats } from '../data/mockData';
+import { apiService } from '../services/api';
 
 export default function AdminThreats() {
   const [activeTab, setActiveTab] = useState('overview');
+  const [threats, setThreats] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const criticalThreats = mockThreats.filter(t => t.severity === 'Critical').length;
-  const activeThreats = mockThreats.filter(t => t.status === 'Active').length;
-  const totalAffectedSystems = mockThreats.reduce((sum, t) => sum + t.affectedSystems, 0);
+  const criticalThreats = threats.filter(t => t.severity === 'Critical').length;
+  const activeThreats = threats.filter(t => t.status === 'Active').length;
+  const totalAffectedSystems = threats.reduce((sum, t) => sum + (t.affectedSystems || 0), 0);
 
   const stats = [
     {
       title: 'Total Threats',
-      value: mockThreats.length,
+      value: threats.length,
       icon: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z',
       color: 'text-yellow-400'
     },
@@ -38,6 +41,43 @@ export default function AdminThreats() {
       color: 'text-cyan-400'
     }
   ];
+
+  useEffect(() => {
+    const fetchThreats = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await apiService.getThreats();
+        setThreats(data);
+      } catch (err) {
+        setError('Failed to load threats.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchThreats();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-400" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-red-600">
+        <p>{error}</p>
+        <button className="mt-4 px-4 py-2 bg-teal-600 rounded text-white" onClick={() => window.location.reload()}>
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
@@ -100,7 +140,7 @@ export default function AdminThreats() {
           transition={{ duration: 0.3, delay: 0.4 }}
           className="mb-8"
         >
-          <ThreatFeedTicker />
+          <ThreatFeedTicker threats={threats} />
         </motion.div>
 
         {/* Navigation Tabs */}
@@ -154,7 +194,7 @@ export default function AdminThreats() {
           transition={{ duration: 0.3 }}
         >
           {activeTab === 'overview' && (
-            <ThreatTable />
+            <ThreatTable threats={threats} />
           )}
 
           {activeTab === 'analytics' && (
@@ -174,14 +214,19 @@ export default function AdminThreats() {
             <div className="bg-gray-900/95 backdrop-blur-md border border-teal-500/30 rounded-lg p-6">
               <h3 className="text-lg font-semibold text-cyan-300 mb-4">External Integrations</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[
-                  { name: 'CrowdStrike', status: 'Connected', lastSync: '2 minutes ago' },
-                  { name: 'Mandiant', status: 'Connected', lastSync: '5 minutes ago' },
-                  { name: 'Proofpoint', status: 'Connected', lastSync: '1 minute ago' },
-                  { name: 'Akamai', status: 'Connected', lastSync: '3 minutes ago' },
-                  { name: 'Recorded Future', status: 'Connected', lastSync: '4 minutes ago' },
-                  { name: 'Kaspersky', status: 'Pending', lastSync: 'Never' }
-                ].map((integration, index) => (
+                {[{
+                  name: 'CrowdStrike', status: 'Connected', lastSync: '2 minutes ago'
+                }, {
+                  name: 'Mandiant', status: 'Connected', lastSync: '5 minutes ago'
+                }, {
+                  name: 'Proofpoint', status: 'Connected', lastSync: '1 minute ago'
+                }, {
+                  name: 'Akamai', status: 'Connected', lastSync: '3 minutes ago'
+                }, {
+                  name: 'Recorded Future', status: 'Connected', lastSync: '4 minutes ago'
+                }, {
+                  name: 'Kaspersky', status: 'Pending', lastSync: 'Never'
+                }].map((integration, index) => (
                   <motion.div
                     key={integration.name}
                     initial={{ opacity: 0, y: 20 }}

@@ -1,55 +1,45 @@
-import React, { useState, useEffect } from 'react';
-import { FiPlay, FiPause, FiFilter, FiAlertTriangle, FiInfo, FiX } from 'react-icons/fi';
+import React, { useState, useEffect, useRef } from 'react';
+import { FiPlay, FiPause, FiAlertTriangle, FiInfo } from 'react-icons/fi';
 import LogStream from '../components/admin/LogStream';
 import SeverityFilter from '../components/admin/SeverityFilter';
 import PauseButton from '../components/admin/PauseButton';
+import { apiService } from '../services/api';
 
 const AdminSOC = () => {
   const [isStreaming, setIsStreaming] = useState(true);
   const [severityFilter, setSeverityFilter] = useState('all');
   const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const intervalRef = useRef(null);
 
-  // Mock log data generation
+  const fetchLogs = async () => {
+    try {
+      setError(null);
+      const latestLogs = await apiService.getLogs();
+      setLogs(latestLogs);
+      setLoading(false);
+    } catch (err) {
+      setError('Failed to fetch logs.');
+      setLoading(false);
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
-    if (!isStreaming) return;
+    if (isStreaming) {
+      fetchLogs();
+      intervalRef.current = setInterval(fetchLogs, 2000);
+    } else if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
 
-    const generateLog = () => {
-      const severities = ['critical', 'high', 'medium', 'low', 'info'];
-      const sources = ['Firewall', 'IDS', 'SIEM', 'Endpoint', 'Network', 'Application'];
-      const messages = [
-        'Unauthorized access attempt detected',
-        'Malware signature detected',
-        'DDoS attack pattern identified',
-        'Suspicious login from unknown IP',
-        'SSL certificate expired',
-        'High CPU usage detected',
-        'Database connection failed',
-        'File integrity check failed',
-        'VPN tunnel disconnected',
-        'Configuration change detected'
-      ];
-
-      const severity = severities[Math.floor(Math.random() * severities.length)];
-      const source = sources[Math.floor(Math.random() * sources.length)];
-      const message = messages[Math.floor(Math.random() * messages.length)];
-
-      return {
-        id: Date.now() + Math.random(),
-        timestamp: new Date().toISOString(),
-        severity,
-        source,
-        message,
-        ip: `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
-        user: Math.random() > 0.5 ? `user${Math.floor(Math.random() * 1000)}` : null
-      };
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
     };
-
-    const interval = setInterval(() => {
-      const newLog = generateLog();
-      setLogs(prev => [newLog, ...prev.slice(0, 99)]); // Keep last 100 logs
-    }, 2000);
-
-    return () => clearInterval(interval);
   }, [isStreaming]);
 
   const filteredLogs = severityFilter === 'all'
@@ -63,6 +53,25 @@ const AdminSOC = () => {
     medium: logs.filter(l => l.severity === 'medium').length,
     low: logs.filter(l => l.severity === 'low').length
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-400" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-red-600">
+        <p>{error}</p>
+        <button className="mt-4 px-4 py-2 bg-teal-600 rounded text-white" onClick={fetchLogs}>
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

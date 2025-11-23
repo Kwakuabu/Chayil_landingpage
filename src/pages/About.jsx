@@ -85,19 +85,35 @@ export default function About() {
   }
 
   return (
-    <div className="min-h-screen bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/background5.jpg')" }}>
+    <div className="relative min-h-screen">
+      {/* Background Image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat -z-10"
+        style={{ backgroundImage: 'url(' + import.meta.env.BASE_URL + 'images/background5.jpg)' }}
+      />
+      {/* Overlay */}
+      <div
+        className={`absolute inset-0 transition-colors duration-500 ${
+          isDark ? 'bg-black bg-opacity-70' : 'bg-white bg-opacity-40'
+        } -z-5`}
+      />
+      {/* Main content */}
       <motion.section
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}
-        className="min-h-screen py-12 px-4"
+        className="relative min-h-screen py-12 px-4"
       >
-        <h1 className={`text-4xl font-bold mb-4 ${
-          isDark ? 'text-cyan-300' : 'text-white'
-        }`}>About Chayil SecureX</h1>
-        <p className={`${isDark ? 'text-gray-300' : 'text-black'} mb-6 max-w-4xl mx-auto`}>
-          Building Africa's digital trust through world-class GRC and cybersecurity solutions.
-        </p>
+        <div className={`max-w-4xl mx-auto mb-8 rounded-lg p-6 ${
+          isDark ? 'bg-gray-800' : 'bg-white'
+        }`}>
+          <h1 className={`text-4xl font-bold mb-4 ${
+            isDark ? 'text-cyan-300' : 'text-gray-900'
+          }`}>About Chayil SecureX</h1>
+          <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} mb-0`}>
+            Building Africa's digital trust through world-class GRC and cybersecurity solutions.
+          </p>
+        </div>
 
         {/* Tab Navigation */}
         <div className="flex justify-center mb-8">
@@ -232,9 +248,7 @@ export default function About() {
               }`}>Strategic Advisors</h2>
               <p className={`leading-relaxed max-w-4xl mx-auto mb-8 ${
                 isDark ? 'text-gray-400' : 'text-gray-600'
-              }`}>
-                {tabs[3].details}
-              </p>
+              }`}>{tabs[3].details}</p>
               {selectedMember ? (
                 <div className="text-center">
                   <img src={selectedMember.image} alt={selectedMember.name} className="w-32 h-32 rounded-full mx-auto mb-6 border-2 border-teal-500" />

@@ -38,7 +38,7 @@ export default function Home() {
   const { isDark } = useTheme()
 
   return (
-    <div className="min-h-screen bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/background4.jpg')" }}>
+    <div className="min-h-screen bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/images/background4.jpg')" }}>
       <div className="text-center max-w-6xl mx-auto px-4 py-12 min-h-screen">
       <h1 className="text-2xl font-bold mb-4 text-cyan-300">
         Chayil SecureX - Africa's Trusted Partner in GRC & Cybersecurity

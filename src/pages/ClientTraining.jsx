@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { BookOpen, Award, Filter, Search, Grid, List } from 'lucide-react';
+import { BookOpen, Award, Search, Grid, List } from 'lucide-react';
 import ModuleCard from '../components/client/ModuleCard';
 import Certificate from '../components/client/Certificate';
 import Quiz from '../components/client/Quiz';
-import { mockTrainingModules, mockCertificates } from '../data/mockData';
+import { apiService } from '../services/api';
 
 const ClientTraining = () => {
   const [activeTab, setActiveTab] = useState('modules');
@@ -13,8 +13,34 @@ const ClientTraining = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showQuiz, setShowQuiz] = useState(false);
   const [currentModule, setCurrentModule] = useState(null);
+  const [trainingModules, setTrainingModules] = useState([]);
+  const [certificates, setCertificates] = useState([]);
+  const [loadingModules, setLoadingModules] = useState(false);
+  const [loadingCertificates, setLoadingCertificates] = useState(false);
+  const [error, setError] = useState(null);
 
-  const filteredModules = mockTrainingModules.filter(module => {
+  useEffect(() => {
+    const fetchTrainingData = async () => {
+      setLoadingModules(true);
+      setLoadingCertificates(true);
+      setError(null);
+      try {
+        const modules = await apiService.getTrainingModules();
+        setTrainingModules(modules);
+        const clientDashboard = await apiService.getClientDashboard();
+        setCertificates(clientDashboard.certificates || []);
+      } catch (err) {
+        setError('Failed to load training data');
+        console.error(err);
+      } finally {
+        setLoadingModules(false);
+        setLoadingCertificates(false);
+      }
+    };
+    fetchTrainingData();
+  }, []);
+
+  const filteredModules = trainingModules.filter(module => {
     const matchesFilter = filter === 'all' || module.status === filter;
     const matchesSearch = module.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          module.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -22,37 +48,34 @@ const ClientTraining = () => {
   });
 
   const stats = {
-    totalModules: mockTrainingModules.length,
-    completedModules: mockTrainingModules.filter(m => m.status === 'completed').length,
-    inProgressModules: mockTrainingModules.filter(m => m.status === 'in_progress').length,
-    certificatesEarned: mockCertificates.length,
+    totalModules: trainingModules.length,
+    completedModules: trainingModules.filter(m => m.status === 'completed').length,
+    inProgressModules: trainingModules.filter(m => m.status === 'in_progress').length,
+    certificatesEarned: certificates.length,
   };
 
   const handleStartModule = (moduleId) => {
-    const module = mockTrainingModules.find(m => m.id === moduleId);
+    const module = trainingModules.find(m => m.id === moduleId);
     setCurrentModule(module);
     setShowQuiz(true);
   };
 
   const handleContinueModule = (moduleId) => {
-    const module = mockTrainingModules.find(m => m.id === moduleId);
+    const module = trainingModules.find(m => m.id === moduleId);
     setCurrentModule(module);
     setShowQuiz(true);
   };
 
   const handleQuizComplete = (score, answers) => {
-    // In a real app, this would update the backend
     console.log('Quiz completed:', { score, answers, module: currentModule });
     setShowQuiz(false);
     setCurrentModule(null);
   };
 
   const handleDownloadCertificate = (certificate) => {
-    // In a real app, this would trigger a download
     console.log('Downloading certificate:', certificate);
   };
 
-  // Mock quiz questions - in a real app, these would come from the backend
   const quizQuestions = [
     {
       question: "What is the most common type of cyber attack?",
@@ -96,10 +119,25 @@ const ClientTraining = () => {
     );
   }
 
+  if (loadingModules || loadingCertificates) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-gray-500 dark:text-gray-400">
+        Loading training data...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-500">
+        {error}
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -115,8 +153,6 @@ const ClientTraining = () => {
             Enhance your cybersecurity knowledge with interactive training modules and earn certificates.
           </p>
         </motion.div>
-
-        {/* Stats Cards */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -132,7 +168,6 @@ const ClientTraining = () => {
               <BookOpen className="w-8 h-8 text-blue-600" />
             </div>
           </div>
-
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -142,7 +177,6 @@ const ClientTraining = () => {
               <Award className="w-8 h-8 text-green-600" />
             </div>
           </div>
-
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -152,7 +186,6 @@ const ClientTraining = () => {
               <BookOpen className="w-8 h-8 text-yellow-600" />
             </div>
           </div>
-
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -163,8 +196,6 @@ const ClientTraining = () => {
             </div>
           </div>
         </motion.div>
-
-        {/* Tabs */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -193,8 +224,6 @@ const ClientTraining = () => {
               Certificates
             </button>
           </div>
-
-          {/* Filters and Search */}
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="relative">
@@ -218,7 +247,6 @@ const ClientTraining = () => {
                 <option value="not_started">Not Started</option>
               </select>
             </div>
-
             {activeTab === 'modules' && (
               <div className="flex items-center space-x-2">
                 <button
@@ -237,8 +265,6 @@ const ClientTraining = () => {
             )}
           </div>
         </motion.div>
-
-        {/* Content */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -261,7 +287,7 @@ const ClientTraining = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockCertificates.map((certificate) => (
+              {certificates.map((certificate) => (
                 <Certificate
                   key={certificate.id}
                   certificate={certificate}

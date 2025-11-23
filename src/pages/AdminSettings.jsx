@@ -1,34 +1,31 @@
-import React, { useState } from 'react';
-import { FiSettings, FiShield, FiBell, FiDatabase, FiMail, FiLock, FiSave } from 'react-icons/fi';
+import React, { useState, useEffect } from 'react';
+import { FiSettings, FiShield, FiBell, FiDatabase, FiSave } from 'react-icons/fi';
+import { apiService } from '../services/api';
 
 const AdminSettings = () => {
-  const [settings, setSettings] = useState({
-    // Security Settings
-    twoFactorRequired: true,
-    sessionTimeout: 30,
-    passwordPolicy: 'strong',
-    loginAttempts: 5,
-
-    // Notification Settings
-    emailAlerts: true,
-    smsAlerts: false,
-    criticalAlerts: true,
-    weeklyReports: true,
-
-    // System Settings
-    maintenanceMode: false,
-    debugMode: false,
-    logRetention: 90,
-    backupFrequency: 'daily',
-
-    // Integration Settings
-    apiRateLimit: 1000,
-    webhookUrl: '',
-    slackWebhook: '',
-    emailProvider: 'smtp'
-  });
-
+  const [settings, setSettings] = useState(null);
   const [activeTab, setActiveTab] = useState('security');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await apiService.getSettings();
+        setSettings(data);
+      } catch (err) {
+        setError('Failed to load settings.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSettings();
+  }, []);
 
   const handleSettingChange = (key, value) => {
     setSettings(prev => ({
@@ -37,9 +34,18 @@ const AdminSettings = () => {
     }));
   };
 
-  const handleSave = () => {
-    // Mock save functionality
-    alert('Settings saved successfully!');
+  const handleSave = async () => {
+    setSaving(true);
+    setError(null);
+    try {
+      await apiService.saveSettings(settings);
+      alert('Settings saved successfully!');
+    } catch (err) {
+      setError('Failed to save settings.');
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const tabs = [
@@ -48,6 +54,29 @@ const AdminSettings = () => {
     { id: 'system', label: 'System', icon: FiSettings },
     { id: 'integrations', label: 'Integrations', icon: FiDatabase }
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-400" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-red-600">
+        <p>{error}</p>
+        <button className="mt-4 px-4 py-2 bg-teal-600 rounded text-white" onClick={() => window.location.reload()}>
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (!settings) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -88,7 +117,6 @@ const AdminSettings = () => {
         {/* Settings Content */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
           <div className="p-6">
-            {/* Security Settings */}
             {activeTab === 'security' && (
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Security Configuration</h3>
@@ -160,7 +188,6 @@ const AdminSettings = () => {
               </div>
             )}
 
-            {/* Notification Settings */}
             {activeTab === 'notifications' && (
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Notification Preferences</h3>
@@ -221,7 +248,6 @@ const AdminSettings = () => {
               </div>
             )}
 
-            {/* System Settings */}
             {activeTab === 'system' && (
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">System Configuration</h3>
@@ -288,7 +314,6 @@ const AdminSettings = () => {
               </div>
             )}
 
-            {/* Integration Settings */}
             {activeTab === 'integrations' && (
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Integration Settings</h3>
@@ -351,14 +376,16 @@ const AdminSettings = () => {
               </div>
             )}
 
-            {/* Save Button */}
             <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
               <button
                 onClick={handleSave}
-                className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200"
+                disabled={saving}
+                className={`flex items-center gap-2 px-6 py-3 rounded-md transition-colors duration-200 text-white ${
+                  saving ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                }`}
               >
                 <FiSave className="w-4 h-4" />
-                Save Settings
+                {saving ? 'Saving...' : 'Save Settings'}
               </button>
             </div>
           </div>

@@ -25,7 +25,7 @@ export default function Header() {
       <div className="max-w-6xl mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           <Link to="/" className="flex items-center">
-            <img src="/logo.jpg" alt="Chayil SecureX Logo" className="h-10 w-auto mr-2 rounded-full" />
+            <img src="/images/logo.jpg" alt="Chayil SecureX Logo" className="h-10 w-auto mr-2 rounded-full" />
             <span className="text-2xl font-bold">Chayil SecureX</span>
           </Link>
 

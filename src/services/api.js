@@ -39,98 +39,86 @@ class ApiService {
 
   // Auth methods
   async login(credentials) {
-    // Mock login for development - simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    const { email, password } = credentials;
-
-    // Mock user data
-    const mockUsers = {
-      'admin@chayil.com': {
-        id: 1,
-        email: 'admin@chayil.com',
-        name: 'Admin User',
-        role: 'admin',
-        token: 'mock-jwt-token-admin-12345'
-      },
-      'client@chayil.com': {
-        id: 2,
-        email: 'client@chayil.com',
-        name: 'Client User',
-        role: 'client',
-        token: 'mock-jwt-token-client-12345'
-      },
-      'analyst@chayil.com': {
-        id: 3,
-        email: 'analyst@chayil.com',
-        name: 'Analyst User',
-        role: 'analyst',
-        token: 'mock-jwt-token-analyst-12345'
-      }
-    };
-
-    const user = mockUsers[email];
-
-    if (user && password === 'password') {
-      return {
-        user: user,
-        token: user.token
-      };
-    } else {
-      throw new Error('Invalid email or password');
+    try {
+      const response = await this.request('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify(credentials)
+      });
+      return response;
+    } catch (error) {
+      throw new Error(error.message || 'Login failed');
     }
   }
 
   async register(userData) {
-    // Mock register for development
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Simulate successful registration
-    return {
-      message: 'Registration successful',
-      user: {
-        id: Date.now(),
-        email: userData.email,
-        name: userData.name,
-        role: 'client'
-      }
-    };
+    try {
+      const response = await this.request('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify(userData)
+      });
+      return response;
+    } catch (error) {
+      throw new Error(error.message || 'Registration failed');
+    }
   }
 
   async forgotPassword(email) {
-    // Mock forgot password for development
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Simulate email sent
-    return { message: 'Password reset email sent' };
+    try {
+      const response = await this.request('/auth/forgot-password', {
+        method: 'POST',
+        body: JSON.stringify({ email })
+      });
+      return response;
+    } catch (error) {
+      throw new Error(error.message || 'Password reset failed');
+    }
   }
 
   async verify2FA(code) {
-    // Mock 2FA verification for development
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    if (code === '123456') {
-      return {
-        token: 'mock-jwt-token-2fa-12345',
-        user: {
-          id: 1,
-          email: 'admin@chayil.com',
-          name: 'Admin User',
-          role: 'admin'
-        }
-      };
-    } else {
-      throw new Error('Invalid 2FA code');
+    try {
+      const response = await this.request('/auth/verify-2fa', {
+        method: 'POST',
+        body: JSON.stringify({ code })
+      });
+      return response;
+    } catch (error) {
+      throw new Error(error.message || '2FA verification failed');
     }
   }
 
   async refreshToken() {
-    // Mock token refresh for development
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      const response = await this.request('/auth/refresh-token', {
+        method: 'POST'
+      });
+      return response;
+    } catch (error) {
+      throw new Error(error.message || 'Token refresh failed');
+    }
+  }
 
-    return {
-      token: 'mock-refreshed-jwt-token-12345'
-    };
+  async googleLogin(tokenData) {
+    try {
+      const response = await this.request('/auth/google-login', {
+        method: 'POST',
+        body: JSON.stringify(tokenData)
+      });
+      return response;
+    } catch (error) {
+      throw new Error(error.message || 'Google login failed');
+    }
+  }
+
+  async googleSignup(tokenData) {
+    try {
+      const response = await this.request('/auth/google-signup', {
+        method: 'POST',
+        body: JSON.stringify(tokenData)
+      });
+      return response;
+    } catch (error) {
+      throw new Error(error.message || 'Google signup failed');
+    }
   }
 
   // Admin endpoints

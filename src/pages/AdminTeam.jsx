@@ -1,50 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiUser, FiUserPlus, FiEdit, FiTrash2, FiMail, FiPhone, FiShield, FiSettings } from 'react-icons/fi';
+import { apiService } from '../services/api';
 
 const AdminTeam = () => {
-  const [teamMembers, setTeamMembers] = useState([
-    {
-      id: 1,
-      name: 'John Smith',
-      email: 'john.smith@chayilsecurex.com',
-      phone: '+1 (555) 123-4567',
-      role: 'SOC Analyst',
-      status: 'Active',
-      lastActive: '2024-01-15 14:30',
-      avatar: null
-    },
-    {
-      id: 2,
-      name: 'Sarah Johnson',
-      email: 'sarah.johnson@chayilsecurex.com',
-      phone: '+1 (555) 234-5678',
-      role: 'Security Engineer',
-      status: 'Active',
-      lastActive: '2024-01-15 13:45',
-      avatar: null
-    },
-    {
-      id: 3,
-      name: 'Mike Davis',
-      email: 'mike.davis@chayilsecurex.com',
-      phone: '+1 (555) 345-6789',
-      role: 'Threat Intelligence Analyst',
-      status: 'Inactive',
-      lastActive: '2024-01-14 16:20',
-      avatar: null
-    },
-    {
-      id: 4,
-      name: 'Emily Chen',
-      email: 'emily.chen@chayilsecurex.com',
-      phone: '+1 (555) 456-7890',
-      role: 'Incident Response Lead',
-      status: 'Active',
-      lastActive: '2024-01-15 12:15',
-      avatar: null
-    }
-  ]);
-
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
   const [formData, setFormData] = useState({
@@ -63,17 +24,48 @@ const AdminTeam = () => {
     'System Administrator'
   ];
 
-  const handleAddMember = () => {
-    const newMember = {
-      id: Date.now(),
-      ...formData,
-      status: 'Active',
-      lastActive: new Date().toISOString().slice(0, 16).replace('T', ' '),
-      avatar: null
-    };
-    setTeamMembers([...teamMembers, newMember]);
-    setShowAddModal(false);
-    setFormData({ name: '', email: '', phone: '', role: 'SOC Analyst' });
+  // Patch Charles Fiifi Hagan member image to ceo.jpg
+  const patchMemberImage = (members) => {
+    return members.map(member => {
+      if (member.name === 'Charles Fiifi Hagan') {
+        return { ...member, image: '/images/ceo.jpg' };
+      }
+      return member;
+    });
+  };
+
+  const fetchTeamMembers = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const members = await apiService.getTeamMembers();
+      const patchedMembers = patchMemberImage(members);
+      setTeamMembers(patchedMembers);
+    } catch (err) {
+      setError('Failed to load team members.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTeamMembers();
+  }, []);
+
+  const handleAddMember = async () => {
+    try {
+      setLoading(true);
+      await apiService.addTeamMember(formData);
+      await fetchTeamMembers();
+      setShowAddModal(false);
+      setFormData({ name: '', email: '', phone: '', role: 'SOC Analyst' });
+    } catch (err) {
+      setError('Failed to add member.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleEditMember = (member) => {
@@ -84,21 +76,37 @@ const AdminTeam = () => {
       phone: member.phone,
       role: member.role
     });
+    setShowAddModal(true);
   };
 
-  const handleUpdateMember = () => {
-    setTeamMembers(teamMembers.map(member =>
-      member.id === editingMember.id
-        ? { ...member, ...formData }
-        : member
-    ));
-    setEditingMember(null);
-    setFormData({ name: '', email: '', phone: '', role: 'SOC Analyst' });
+  const handleUpdateMember = async () => {
+    try {
+      setLoading(true);
+      await apiService.updateTeamMember(editingMember.id, formData);
+      await fetchTeamMembers();
+      setEditingMember(null);
+      setShowAddModal(false);
+      setFormData({ name: '', email: '', phone: '', role: 'SOC Analyst' });
+    } catch (err) {
+      setError('Failed to update member.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDeleteMember = (id) => {
+  const handleDeleteMember = async (id) => {
     if (window.confirm('Are you sure you want to remove this team member?')) {
-      setTeamMembers(teamMembers.filter(member => member.id !== id));
+      try {
+        setLoading(true);
+        await apiService.deleteTeamMember(id);
+        await fetchTeamMembers();
+      } catch (err) {
+        setError('Failed to delete member.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -119,6 +127,25 @@ const AdminTeam = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-400" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-red-600">
+        <p>{error}</p>
+        <button className="mt-4 px-4 py-2 bg-teal-600 rounded text-white" onClick={fetchTeamMembers}>
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -131,7 +158,11 @@ const AdminTeam = () => {
             </p>
           </div>
           <button
-            onClick={() => setShowAddModal(true)}
+            onClick={() => {
+              setShowAddModal(true);
+              setEditingMember(null);
+              setFormData({ name: '', email: '', phone: '', role: 'SOC Analyst' });
+            }}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200"
           >
             <FiUserPlus className="w-4 h-4" />
@@ -225,13 +256,21 @@ const AdminTeam = () => {
                   <tr key={member.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <div className="h-10 w-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                              {member.name.split(' ').map(n => n[0]).join('')}
-                            </span>
-                          </div>
+                    <div className="flex-shrink-0 h-10 w-10">
+                      {member.image ? (
+                        <img
+                          src={member.image}
+                          alt={member.name}
+                          className="h-10 w-10 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="h-10 w-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {member.name.split(' ').map(n => n[0]).join('')}
+                          </span>
                         </div>
+                      )}
+                    </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900 dark:text-white">
                             {member.name}

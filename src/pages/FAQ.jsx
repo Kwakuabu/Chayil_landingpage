@@ -38,17 +38,31 @@ export default function FAQ() {
   }
 
   return (
-    <div className="min-h-screen bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/background5.jpg')" }}>
+    <div className="relative min-h-screen">
+      {/* Background Image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat -z-10"
+        style={{ backgroundImage: `url('${import.meta.env.BASE_URL}images/background5.jpg')` }}
+      />
+      {/* Overlay */}
+      <div
+        className={`absolute inset-0 transition-colors duration-500 ${
+          isDark ? 'bg-black bg-opacity-70' : 'bg-white bg-opacity-40'
+        } -z-5`}
+      />
+      {/* Main content */}
       <motion.section
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}
-        className="text-center max-w-6xl mx-auto px-4 py-12 min-h-screen"
+        className="relative text-center max-w-6xl mx-auto px-4 py-12 min-h-screen"
       >
-        <h1 className="text-4xl font-bold mb-4 text-white">Frequently Asked Questions</h1>
-        <p className="text-gray-300 mb-6 max-w-4xl mx-auto">
-          Find answers to common questions about our services and approach.
-        </p>
+        <div className="max-w-4xl mx-auto mb-8 rounded-lg p-6 bg-white">
+          <h1 className="text-4xl font-bold mb-4 text-gray-900">Frequently Asked Questions</h1>
+          <p className="mb-0 text-gray-700">
+            Find answers to common questions about our services and approach.
+          </p>
+        </div>
         <div className="max-w-3xl mx-auto space-y-4">
           {faqs.map((faq, i) => (
             <motion.div key={i} className="bg-gray-900 text-gray-300 p-4 rounded-lg shadow-lg border border-teal-500/20">
