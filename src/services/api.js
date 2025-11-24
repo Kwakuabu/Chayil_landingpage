@@ -1,6 +1,5 @@
 // API service layer for backend-ready frontend
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:3001/api";
 
 class ApiService {
   constructor() {
@@ -20,16 +19,38 @@ class ApiService {
 
     // Add auth token if available (for non-auth endpoints)
     if (!endpoint.includes("/auth") && this.getAuthToken()) {
+      config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${this.getAuthToken()}`;
     }
 
     try {
-      const response = await fetch(url, config);
+      // Use raw fetch so refresh flow below can call refresh without recursion
+      let response = await this._rawFetch(url, config);
+
+      // If unauthorized, attempt token refresh once and retry
+      if (response.status === 401 && !options._retry) {
+        try {
+          const refreshResp = await this.refreshToken();
+          // If refresh returned a token, set it and retry original request
+          const newToken = refreshResp?.token || refreshResp?.access_token;
+          if (newToken) {
+            this.setAuthToken(newToken);
+            // update header and retry
+            config.headers = config.headers || {};
+            config.headers.Authorization = `Bearer ${newToken}`;
+            options._retry = true;
+            response = await this._rawFetch(url, config);
+          }
+        } catch (refreshError) {
+          // refresh failed — proceed to error handling below
+          console.error("Token refresh failed:", refreshError);
+        }
+      }
 
       if (!response.ok) {
         const error = await response
           .json()
-          .catch(() => ({ message: "Network error" }));
+          .catch(() => ({ message: `HTTP ${response.status}` }));
         throw new Error(error.message || `HTTP ${response.status}`);
       }
 
@@ -40,184 +61,108 @@ class ApiService {
     }
   }
 
-  // Auth methods
+  // Low-level fetch wrapper that doesn't perform token-refresh recursion
+  async _rawFetch(url, config = {}) {
+    // Ensure we don't send an undefined body
+    const rawConfig = { ...config };
+    if (rawConfig.body === undefined) delete rawConfig.body;
+    return fetch(url, rawConfig);
+  }
+
   async login(credentials) {
-<<<<<<< HEAD
-    try {
-      const response = await this.request('/auth/login', {
-        method: 'POST',
-        body: JSON.stringify(credentials)
-      });
-      return response;
-    } catch (error) {
-      throw new Error(error.message || 'Login failed');
-=======
-    // Mock login for development - simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
+    // Send login to backend. Expects backend to return JSON like { user, token }
     const { email, password } = credentials;
+    const payload = { email, password };
 
-    // Mock user data
-    const mockUsers = [
-      {
-        id: 1,
-        email: "admin@chayil.com",
-        name: "Admin User",
-        role: "admin",
-        token: "mock-jwt-token-admin-12345",
-      },
-      {
-        id: 2,
-        email: "client@chayil.com",
-        name: "Client User",
-        role: "client",
-        token: "mock-jwt-token-client-12345",
-      },
-      {
-        id: 3,
-        email: "analyst@chayil.com",
-        name: "Analyst User",
-        role: "analyst",
-        token: "mock-jwt-token-analyst-12345",
-      },
-    ];
-    for (let i = 0; i < mockUsers.length; i++) {
-      const mockUser = mockUsers[i];
-      const user = mockUser;
-      const mockEmail = mockUser.email;
+    const response = await this.request("/auth/login", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
 
-      if (mockEmail == email && password === "password") {
-        console.log(mockEmail);
-        return {
-          user: user,
-          token: user.token,
-        };
-      }
->>>>>>> 6a637071ab5a3889e785dc0379a33803f0570d99
-    }
-    throw new Error("Invalid email or password");
+    return response;
   }
 
   async register(userData) {
-<<<<<<< HEAD
-    try {
-      const response = await this.request('/auth/register', {
-        method: 'POST',
-        body: JSON.stringify(userData)
-      });
-      return response;
-    } catch (error) {
-      throw new Error(error.message || 'Registration failed');
-    }
+    // Forward registration to backend
+    const response = await this.request("/auth/register", {
+      method: "POST",
+      body: JSON.stringify(userData),
+    });
+    return response;
   }
 
   async forgotPassword(email) {
-    try {
-      const response = await this.request('/auth/forgot-password', {
-        method: 'POST',
-        body: JSON.stringify({ email })
-      });
-      return response;
-    } catch (error) {
-      throw new Error(error.message || 'Password reset failed');
-    }
+    // Trigger forgot-password on backend
+    const response = await this.request("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+    return response;
   }
 
   async verify2FA(code) {
-    try {
-      const response = await this.request('/auth/verify-2fa', {
-        method: 'POST',
-        body: JSON.stringify({ code })
-      });
-      return response;
-    } catch (error) {
-      throw new Error(error.message || '2FA verification failed');
-=======
-    // Mock register for development
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // Simulate successful registration
-    return {
-      message: "Registration successful",
-      user: {
-        id: Date.now(),
-        email: userData.email,
-        name: userData.name,
-        role: "client",
-      },
-    };
-  }
-
-  async forgotPassword(email) {
-    // Mock forgot password for development
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // Simulate email sent
-    return { message: "Password reset email sent" };
-  }
-
-  async verify2FA(code) {
-    // Mock 2FA verification for development
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    if (code === "123456") {
-      return {
-        token: "mock-jwt-token-2fa-12345",
-        user: {
-          id: 1,
-          email: "admin@chayil.com",
-          name: "Admin User",
-          role: "admin",
-        },
-      };
+    // Accept either a string code or an object { email, token }
+    let bodyPayload;
+    if (typeof code === "string") {
+      bodyPayload = { token: code };
+    } else if (typeof code === "object" && code !== null) {
+      // expected shape: { email, token }
+      bodyPayload = code;
     } else {
-      throw new Error("Invalid 2FA code");
->>>>>>> 6a637071ab5a3889e785dc0379a33803f0570d99
+      throw new Error("Invalid payload for verify2FA");
     }
+
+    // Verify 2FA code with backend (controller expects token + email)
+    const response = await this.request("/auth/verify2fa", {
+      method: "POST",
+      body: JSON.stringify(bodyPayload),
+    });
+    return response;
   }
 
   async refreshToken() {
-<<<<<<< HEAD
+    // Refresh token using a raw fetch to avoid recursion with request()
+    const url = `${this.baseURL}/auth/refresh`;
     try {
-      const response = await this.request('/auth/refresh-token', {
-        method: 'POST'
+      // Include the current token in the request body so backend can refresh it
+      const current = this.getAuthToken();
+      const resp = await this._rawFetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token: current }),
       });
-      return response;
+
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({ message: `HTTP ${resp.status}` }));
+        throw new Error(err.message || `HTTP ${resp.status}`);
+      }
+
+      const data = await resp.json();
+      return data;
     } catch (error) {
-      throw new Error(error.message || 'Token refresh failed');
+      console.error("refreshToken failed:", error);
+      throw error;
     }
   }
 
-  async googleLogin(tokenData) {
-    try {
-      const response = await this.request('/auth/google-login', {
-        method: 'POST',
-        body: JSON.stringify(tokenData)
-      });
-      return response;
-    } catch (error) {
-      throw new Error(error.message || 'Google login failed');
-    }
+  // Social / Google auth
+  async googleLogin({ token }) {
+    // Send Google access token to backend to verify and create/login user
+    const response = await this.request("/auth/google-login", {
+      method: "POST",
+      body: JSON.stringify({ token }),
+    });
+    return response;
   }
 
-  async googleSignup(tokenData) {
-    try {
-      const response = await this.request('/auth/google-signup', {
-        method: 'POST',
-        body: JSON.stringify(tokenData)
-      });
-      return response;
-    } catch (error) {
-      throw new Error(error.message || 'Google signup failed');
-    }
-=======
-    // Mock token refresh for development
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    return {
-      token: "mock-refreshed-jwt-token-12345",
-    };
->>>>>>> 6a637071ab5a3889e785dc0379a33803f0570d99
+  async googleSignup({ token }) {
+    const response = await this.request("/auth/google-signup", {
+      method: "POST",
+      body: JSON.stringify({ token }),
+    });
+    return response;
   }
 
   // Admin endpoints

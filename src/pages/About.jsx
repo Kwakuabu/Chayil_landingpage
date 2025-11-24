@@ -89,7 +89,7 @@ export default function About() {
       {/* Background Image */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat -z-10"
-        style={{ backgroundImage: 'url(' + import.meta.env.BASE_URL + 'images/background5.jpg)' }}
+        style={{ backgroundImage: `url('${import.meta.env.BASE_URL}images/background5.jpg')` }}
       />
       {/* Overlay */}
       <div
@@ -199,43 +199,43 @@ export default function About() {
               }`}>
                 {tabs[2].details}
               </p>
-              {selectedMember ? (
-                <div className="text-center">
-                  <img src={selectedMember.name === 'Charles Fiifi Hagan' ? '/ceo.jpg' : ''} alt={selectedMember.name} className="w-32 h-32 rounded-full mx-auto mb-6 border-2 border-teal-500" />
-                  <h3 className="text-2xl font-bold mb-4 text-cyan-300">{selectedMember.name}</h3>
-                  <p className="text-teal-400 mb-4">{selectedMember.role}</p>
-                  <p className="text-gray-300 leading-relaxed max-w-4xl mx-auto mb-6">{selectedMember.details}</p>
-                  <div className="grid md:grid-cols-2 gap-4 mb-6">
-                    {selectedMember.achievements.map((achievement, i) => (
-                      <div key={i} className="bg-gray-800 p-3 rounded text-cyan-300 border border-teal-500/20">
-                        {achievement}
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    onClick={() => setSelectedMember(null)}
-                    className="bg-gray-700 text-gray-300 px-6 py-2 rounded hover:bg-gray-600 transition border border-teal-500/20"
-                  >
-                    Back to Team
-                  </button>
-                </div>
-              ) : (
-                <div className="grid md:grid-cols-3 gap-6">
-                  {teamMembers.map((member, index) => (
-                    <div
-                      key={index}
-                      onClick={() => handleMemberClick(member)}
-                      className="text-center cursor-pointer hover:bg-gray-800 p-4 rounded-lg transition border border-teal-500/20 hover:border-teal-400/60"
-                    >
-                      <img src={member.name === 'Charles Fiifi Hagan' ? '/ceo.jpg' : ''} alt={member.name} className="w-24 h-24 rounded-full mx-auto mb-4 border border-teal-500" />
-                      <h3 className="font-semibold text-cyan-300">{member.name}</h3>
-                      <p className="text-gray-400 text-sm">{member.role}</p>
-                      <p className="text-gray-500 text-xs mt-2">{member.description}</p>
+            {selectedMember ? (
+              <div className="text-center">
+                <img src={selectedMember.name === 'Charles Fiifi Hagan' ? `${import.meta.env.BASE_URL}ceo.jpg` : ''} alt={selectedMember.name} className="w-32 h-32 rounded-full mx-auto mb-6 border-2 border-teal-500" />
+                <h3 className="text-2xl font-bold mb-4 text-cyan-300">{selectedMember.name}</h3>
+                <p className="text-teal-400 mb-4">{selectedMember.role}</p>
+                <p className="text-gray-300 leading-relaxed max-w-4xl mx-auto mb-6">{selectedMember.details}</p>
+                <div className="grid md:grid-cols-2 gap-4 mb-6">
+                  {selectedMember.achievements.map((achievement, i) => (
+                    <div key={i} className="bg-gray-800 p-3 rounded text-cyan-300 border border-teal-500/20">
+                      {achievement}
                     </div>
                   ))}
                 </div>
-              )}
-            </motion.div>
+                <button
+                  onClick={() => setSelectedMember(null)}
+                  className="bg-gray-700 text-gray-300 px-6 py-2 rounded hover:bg-gray-600 transition border border-teal-500/20"
+                >
+                  Back to Team
+                </button>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-3 gap-6">
+                {teamMembers.map((member, index) => (
+                  <div
+                    key={index}
+                    onClick={() => handleMemberClick(member)}
+                    className="text-center cursor-pointer hover:bg-gray-800 p-4 rounded-lg transition border border-teal-500/20 hover:border-teal-400/60"
+                  >
+                    <img src={member.name === 'Charles Fiifi Hagan' ? `${import.meta.env.BASE_URL}ceo.jpg` : ''} alt={member.name} className="w-24 h-24 rounded-full mx-auto mb-4 border border-teal-500" />
+                    <h3 className="font-semibold text-cyan-300">{member.name}</h3>
+                    <p className="text-gray-400 text-sm">{member.role}</p>
+                    <p className="text-gray-500 text-xs mt-2">{member.description}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </motion.div>
           )}
 
           {activeTab === 'advisors' && (
@@ -251,7 +251,7 @@ export default function About() {
               }`}>{tabs[3].details}</p>
               {selectedMember ? (
                 <div className="text-center">
-                  <img src={selectedMember.image} alt={selectedMember.name} className="w-32 h-32 rounded-full mx-auto mb-6 border-2 border-teal-500" />
+                  <img src={`${import.meta.env.BASE_URL}${selectedMember.image}`} alt={selectedMember.name} className="w-32 h-32 rounded-full mx-auto mb-6 border-2 border-teal-500" />
                   <h3 className="text-2xl font-bold mb-4 text-cyan-300">{selectedMember.name}</h3>
                   <p className="text-teal-400 mb-4">{selectedMember.role}</p>
                   <p className="text-gray-300 leading-relaxed max-w-4xl mx-auto mb-6">{selectedMember.details}</p>
@@ -277,7 +277,7 @@ export default function About() {
                       onClick={() => handleMemberClick(advisor)}
                       className="text-center cursor-pointer hover:bg-gray-800 p-4 rounded-lg transition border border-teal-500/20 hover:border-teal-400/60"
                     >
-                      <img src={advisor.image} alt={advisor.name} className="w-24 h-24 rounded-full mx-auto mb-4 border border-teal-500" />
+                      <img src={`${import.meta.env.BASE_URL}${advisor.image}`} alt={advisor.name} className="w-24 h-24 rounded-full mx-auto mb-4 border border-teal-500" />
                       <h3 className="font-semibold text-cyan-300">{advisor.name}</h3>
                       <p className="text-gray-400 text-sm">{advisor.role}</p>
                     </div>

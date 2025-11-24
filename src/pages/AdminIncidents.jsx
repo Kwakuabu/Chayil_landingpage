@@ -86,7 +86,7 @@ export default function AdminIncidents() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center" style={{ backgroundImage: "url('/background2.jpg')" }}>
+<div className="min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center" style={{ backgroundImage: `url('${import.meta.env.BASE_URL}background2.jpg')` }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-400 mx-auto mb-4"></div>
           <div className="text-cyan-300 text-lg">Loading Incidents...</div>

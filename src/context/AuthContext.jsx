@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [requires2FA, setRequires2FA] = useState(false);
+  const [pending2FAEmail, setPending2FAEmail] = useState(null);
 
   // Helper function to wait until google is loaded via load/error event flags
   const waitForGoogle = () => {
@@ -68,21 +69,22 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       const response = await apiService.login({ email, password });
 
-      if (response.requires2FA) {
+      // Handle common response shapes from backend
+      if (response?.requires2FA) {
         setRequires2FA(true);
+        setPending2FAEmail(email);
         return { success: true, requires2FA: true };
       }
 
-      if (response.token && response.user) {
-        const userData = response.user;
-        console.log(userData);
+      // normalize token and user
+      const token = response?.token || response?.access_token || response?.data?.token || response?.data?.access_token;
+      const userData = response?.user || response?.data?.user || response?.data?.userData || response?.data;
+
+      if (token && userData) {
         setUser(userData);
-        apiService.setAuthToken(response.token);
-
-        // Store in localStorage for persistence
+        apiService.setAuthToken(token);
         localStorage.setItem("user", JSON.stringify(userData));
-        localStorage.setItem("authToken", response.token);
-
+        localStorage.setItem("authToken", token);
         return { success: true, user: userData };
       }
 
@@ -97,16 +99,21 @@ export const AuthProvider = ({ children }) => {
   const verify2FA = async (code) => {
     try {
       setLoading(true);
-      const response = await apiService.verify2FA(code);
+      // send both email and token as backend expects
+      const payload = { token: code, email: pending2FAEmail };
+      const response = await apiService.verify2FA(payload);
 
-      if (response.token && response.user) {
-        const userData = response.user;
+      const token = response?.token || response?.access_token || response?.data?.token;
+      const userData = response?.user || response?.data?.user || response?.data;
+
+      if (token && userData) {
         setUser(userData);
         setRequires2FA(false);
-        apiService.setAuthToken(response.token);
+        setPending2FAEmail(null);
+        apiService.setAuthToken(token);
 
         localStorage.setItem("user", JSON.stringify(userData));
-        localStorage.setItem("authToken", response.token);
+        localStorage.setItem("authToken", token);
 
         return { success: true, user: userData };
       }
@@ -122,6 +129,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     setRequires2FA(false);
+    setPending2FAEmail(null);
     apiService.clearAuthToken();
     localStorage.removeItem("user");
     localStorage.removeItem("authToken");
@@ -131,6 +139,18 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       const response = await apiService.register(userData);
+
+      // normalize possible response
+      const token = response?.token || response?.access_token || response?.data?.token;
+      const user = response?.user || response?.data?.user || response?.data;
+      if (token && user) {
+        setUser(user);
+        apiService.setAuthToken(token);
+        localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('authToken', token);
+        return { success: true, user };
+      }
+
       return { success: true, data: response };
     } catch (error) {
       return { success: false, error: error.message };
@@ -179,12 +199,13 @@ export const AuthProvider = ({ children }) => {
             if (response.access_token) {
               try {
                 const apiResponse = await apiService.googleLogin({ token: response.access_token });
-                if (apiResponse.token && apiResponse.user) {
-                  const userData = apiResponse.user;
+                const token = apiResponse?.token || apiResponse?.access_token || apiResponse?.data?.token;
+                const userData = apiResponse?.user || apiResponse?.data?.user || apiResponse?.data;
+                if (token && userData) {
                   setUser(userData);
-                  apiService.setAuthToken(apiResponse.token);
+                  apiService.setAuthToken(token);
                   localStorage.setItem('user', JSON.stringify(userData));
-                  localStorage.setItem('authToken', apiResponse.token);
+                  localStorage.setItem('authToken', token);
                   resolve({ success: true, user: userData });
                   return;
                 }
@@ -219,12 +240,13 @@ export const AuthProvider = ({ children }) => {
             if (response.access_token) {
               try {
                 const apiResponse = await apiService.googleSignup({ token: response.access_token });
-                if (apiResponse.token && apiResponse.user) {
-                  const userData = apiResponse.user;
+                const token = apiResponse?.token || apiResponse?.access_token || apiResponse?.data?.token;
+                const userData = apiResponse?.user || apiResponse?.data?.user || apiResponse?.data;
+                if (token && userData) {
                   setUser(userData);
-                  apiService.setAuthToken(apiResponse.token);
+                  apiService.setAuthToken(token);
                   localStorage.setItem('user', JSON.stringify(userData));
-                  localStorage.setItem('authToken', apiResponse.token);
+                  localStorage.setItem('authToken', token);
                   resolve({ success: true, user: userData });
                   return;
                 }

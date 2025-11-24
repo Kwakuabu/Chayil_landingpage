@@ -182,7 +182,7 @@ export default function ClientIncidents() {
   );
 
   return (
-    <div className="min-h-screen bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/background2.jpg')" }}>
+<div className="min-h-screen bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url('${import.meta.env.BASE_URL}background2.jpg')` }}>
       <div className="flex">
         {/* Sidebar */}
         <div className="w-64 bg-gray-900/95 backdrop-blur-md min-h-screen border-r border-teal-500/30 shadow-xl">

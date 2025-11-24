@@ -13,7 +13,7 @@ This is a React frontend project built using Vite as the build tool and bundler.
    ```bash
    npm run dev
    ```
-   The app will be available at [http://localhost:8000](http://localhost:8000).
+   The app will be available at [http://localhost:3001](http://localhost:3001).
 
 ## Build for Production
 

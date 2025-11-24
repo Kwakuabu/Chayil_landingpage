@@ -143,6 +143,7 @@ export default function App() {
                 </ProtectedRoute>
               } />
               <Route path="/unauthorized" element={<Unauthorized />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
           {!isDashboard && <Footer />}
@@ -150,6 +151,21 @@ export default function App() {
       </AuthProvider>
     </ThemeProvider>
   )
+
+// NotFound component to show for unmatched routes
+function NotFound() {
+  return (
+    <div className="min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center" style={{ backgroundImage: "url('/images/background5.jpg')" }}>
+      <div className="bg-gray-900/90 backdrop-blur-md p-8 rounded-lg border border-red-500/50 shadow-2xl text-center max-w-md mx-4">
+        <h1 className="text-4xl font-bold text-red-400 mb-4">404 - Page Not Found</h1>
+        <p className="text-white mb-6">Sorry, the page you are looking for does not exist.</p>
+        <a href="/" className="inline-block px-6 py-3 bg-red-500 hover:bg-red-600 text-black font-semibold rounded-md transition-colors duration-200">
+          Go to Home
+        </a>
+      </div>
+    </div>
+  )
+}
 }
 
 // Component to redirect to appropriate dashboard based on user role

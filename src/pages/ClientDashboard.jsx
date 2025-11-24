@@ -36,9 +36,9 @@ export default function ClientDashboard() {
     fetchDashboardData();
   }, []);
 
-  if (loading) {
+if (loading) {
     return (
-      <div className="min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center" style={{ backgroundImage: "url('/background5.jpg')" }}>
+      <div className="min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center" style={{ backgroundImage: `url('${import.meta.env.BASE_URL}background5.jpg')` }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-400 mx-auto mb-4"></div>
           <div className="text-cyan-300 text-lg">Loading Dashboard...</div>
@@ -47,9 +47,9 @@ export default function ClientDashboard() {
     );
   }
 
-  if (error) {
+if (error) {
     return (
-      <div className="min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center" style={{ backgroundImage: "url('/background5.jpg')" }}>
+      <div className="min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center" style={{ backgroundImage: `url('${import.meta.env.BASE_URL}background5.jpg')` }}>
         <div className="min-h-screen bg-black/50 backdrop-blur-sm flex items-center justify-center">
           <div className="bg-gray-900/95 backdrop-blur-md border border-red-500/30 rounded-lg p-8 max-w-md w-full text-center">
             <div className="mx-auto h-16 w-16 bg-red-500/20 rounded-full flex items-center justify-center mb-4">
@@ -80,7 +80,7 @@ export default function ClientDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/background5.jpg')" }}>
+    <div className="min-h-screen bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url('${import.meta.env.BASE_URL}background5.jpg')` }}>
       <div className="min-h-screen bg-black/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <motion.div
