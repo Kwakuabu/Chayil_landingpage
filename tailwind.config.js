@@ -3,6 +3,10 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
+      fontFamily: {
+        poppins: ['Poppins', 'sans-serif'], 
+        roboto: ['Roboto', 'sans-serif'],
+      },
       colors: {
         black: "#000000",
         white: "#FFFFFF",
