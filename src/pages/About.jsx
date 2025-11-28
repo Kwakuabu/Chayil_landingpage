@@ -6,6 +6,7 @@ const teamMembers = [
   {
     name: 'Charles Fiifi Hagan',
     role: 'Founder & CEO – Chayil SecureX',
+    image: `${import.meta.env.BASE_URL}images/ceo.jpg`,
     description: 'Expertise in GRC, IT Audit, Cybersecurity Compliance (ISO 27001, SOC 2, GDPR, HIPAA, PCI DSS, SOX, NIST). Active in African cyber policy dialogues.',
     details: 'Charles Fiifi Hagan is the visionary founder and CEO of Chayil SecureX. With extensive expertise in Governance, Risk & Compliance (GRC), IT Audit, and Cybersecurity Compliance, Charles has been instrumental in shaping cybersecurity policies across Africa. His certifications include ISO 27001 Lead Auditor, SOC 2, GDPR DPO, HIPAA, PCI DSS, SOX, and NIST frameworks. Charles actively participates in African cyber policy dialogues and has advised governments and enterprises on digital transformation strategies. His leadership has positioned Chayil SecureX as a key player in Africa\'s cybersecurity landscape, focusing on bridging the gap between global standards and local regulatory requirements.',
     achievements: ['ISO 27001 Lead Auditor Certified', 'Active African Cyber Policy Contributor', 'Government Cybersecurity Advisor', 'Enterprise Digital Transformation Consultant']
@@ -13,6 +14,7 @@ const teamMembers = [
   {
     name: 'Ebenezer Oduro',
     role: 'Chief Operating Officer (COO)',
+    image: `${import.meta.env.BASE_URL}images/Ebenezer.jpg`,
     description: 'BSc. IT (Ghana), MSc. Cybersecurity (UK). Certified in Cybersecurity (CC), CEH, CISM.',
     details: 'Ebenezer Oduro serves as the Chief Operating Officer, bringing operational excellence to Chayil SecureX. With a BSc in IT from Ghana and an MSc in Cybersecurity from the UK, Ebenezer oversees day-to-day operations and ensures seamless delivery of our services. His certifications include Certified in Cybersecurity (CC), Certified Ethical Hacker (CEH), and Certified Information Security Manager (CISM). Ebenezer specializes in operational risk management and process optimization, ensuring that our clients receive world-class service delivery while maintaining the highest standards of security and compliance.',
     achievements: ['Certified in Cybersecurity (CC)', 'Certified Ethical Hacker (CEH)', 'Certified Information Security Manager (CISM)', 'Operational Excellence Specialist']
@@ -20,6 +22,7 @@ const teamMembers = [
   {
     name: 'Silas Asani Abudu',
     role: 'Chief Technology Officer (CTO) / Head of Cybersecurity',
+    image: `${import.meta.env.BASE_URL}images/Silas.jpg`,
     description: 'MSc Cybersecurity & Digital Forensics. Expertise in Healthcare Cybersecurity, EMR Security, ML for Threat Detection, DevSecOps.',
     details: 'Silas Asani Abudu leads our technology and cybersecurity initiatives as CTO and Head of Cybersecurity. Holding an MSc in Cybersecurity & Digital Forensics, Silas brings deep technical expertise in healthcare cybersecurity, EMR security, machine learning for threat detection, and DevSecOps practices. He has led numerous high-profile security assessments and implementations, focusing on protecting critical infrastructure and sensitive data across various industries. Silas\'s innovative approach combines cutting-edge technology with practical security solutions tailored for African markets.',
     achievements: ['MSc Cybersecurity & Digital Forensics', 'Healthcare Cybersecurity Expert', 'Machine Learning Threat Detection Specialist', 'DevSecOps Implementation Lead']
@@ -30,14 +33,21 @@ const strategicAdvisors = [
   {
     name: 'Dr. Noah Darko-Adjei',
     role: 'Senior Cybersecurity and Compliance Analyst, CEO - Yesyoucan Cybersecure, Dallas, Texas',
-    image: '/advisor1.jpg',
+    image: `${import.meta.env.BASE_URL}images/Noah.jpg`,
     details: 'Dr. Noah Darko-Adjei is a renowned cybersecurity expert and CEO of Yesyoucan Cybersecure in Dallas, Texas. As a Senior Cybersecurity and Compliance Analyst, Dr. Darko-Adjei provides strategic guidance on global cybersecurity trends and compliance frameworks. His expertise spans multiple regulatory environments and he serves as a key advisor for international cybersecurity initiatives. Dr. Darko-Adjei brings invaluable insights from the global cybersecurity landscape, helping Chayil SecureX stay at the forefront of industry developments.',
     expertise: ['Global Cybersecurity Trends', 'International Compliance Frameworks', 'Regulatory Analysis', 'Strategic Cybersecurity Planning']
   },
   {
+    name: 'Seth Odoi Asare',
+    role: 'Cybersecurity Professional, Huntingdon, UK',
+    image: `${import.meta.env.BASE_URL}images/Seth Odoi Asare.jpg`,
+    details: 'Seth Odoi Asare is an accomplished cybersecurity professional based in Huntingdon, UK, bringing extensive expertise in information security and risk management. With an impressive portfolio of certifications and deep knowledge of security frameworks, Seth provides strategic counsel on enterprise-wide cybersecurity initiatives, threat assessment, and compliance management. His background enables him to bridge continental perspectives, offering valuable insights that enhance Chayil SecureX\'s capabilities in global cybersecurity operations.',
+    expertise: ['CRISC', 'CISM', 'CASP+', 'ISO27001 Internal Auditor', 'Security+', 'PENTEST+', 'CySa+', 'Azure Security Engineer']
+  },
+  {
     name: 'Ghana Digital Centres Limited',
     role: 'Accra Digital Centre - Agency of the Ghanaian Government',
-    image: '/advisor2.jpg',
+    image: `${import.meta.env.BASE_URL}images/Accra Digital Center.png`,
     details: 'Ghana Digital Centres Limited operates the Accra Digital Centre, a flagship initiative of the Ghanaian Government. As our strategic partner, they provide access to cutting-edge digital infrastructure and government-backed resources. This partnership enables us to deliver world-class cybersecurity solutions with local relevance and global standards. The collaboration with Ghana Digital Centres Limited gives us unique access to government-level resources and positions us to influence national cybersecurity policies and initiatives.',
     partnership: ['Digital Infrastructure Access', 'Government Resource Collaboration', 'Policy Influence Opportunities', 'National Cybersecurity Initiative Support']
   }
@@ -91,12 +101,8 @@ export default function About() {
         className="absolute inset-0 bg-cover bg-center bg-no-repeat -z-10"
         style={{ backgroundImage: `url('${import.meta.env.BASE_URL}images/background5.jpg')` }}
       />
-      {/* Overlay */}
-      <div
-        className={`absolute inset-0 transition-colors duration-500 ${
-          isDark ? 'bg-black bg-opacity-70' : 'bg-white bg-opacity-40'
-        } -z-5`}
-      />
+      {/* Overlay removed to show original background */}
+      <div className="absolute inset-0 bg-transparent -z-5" />
       {/* Main content */}
       <motion.section
         initial={{ opacity: 0, y: 40 }}
@@ -110,7 +116,7 @@ export default function About() {
           <h1 className={`text-4xl font-bold mb-4 ${
             isDark ? 'text-cyan-300' : 'text-gray-900'
           }`}>About Chayil SecureX</h1>
-          <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'} mb-0`}>
+          <p className={`${isDark ? 'text-gray-300' : 'text-gray-800'} mb-0`}>
             Building Africa's digital trust through world-class GRC and cybersecurity solutions.
           </p>
         </div>
@@ -152,12 +158,12 @@ export default function About() {
                 isDark ? 'text-teal-400' : 'text-gray-900'
               }`}>Our Mission</h2>
               <p className={`text-lg leading-relaxed max-w-4xl mx-auto mb-6 ${
-                isDark ? 'text-gray-300' : 'text-gray-700'
+                isDark ? 'text-gray-300' : 'text-gray-800'
               }`}>
                 {tabs[0].content}
               </p>
               <p className={`leading-relaxed max-w-4xl mx-auto ${
-                isDark ? 'text-gray-400' : 'text-gray-600'
+                isDark ? 'text-gray-400' : 'text-gray-700'
               }`}>
                 {tabs[0].details}
               </p>
@@ -174,12 +180,12 @@ export default function About() {
                 isDark ? 'text-teal-400' : 'text-gray-900'
               }`}>Our Vision</h2>
               <p className={`text-lg leading-relaxed max-w-4xl mx-auto mb-6 ${
-                isDark ? 'text-gray-300' : 'text-gray-700'
+                isDark ? 'text-gray-300' : 'text-gray-800'
               }`}>
                 {tabs[1].content}
               </p>
               <p className={`leading-relaxed max-w-4xl mx-auto ${
-                isDark ? 'text-gray-400' : 'text-gray-600'
+                isDark ? 'text-gray-400' : 'text-gray-700'
               }`}>
                 {tabs[1].details}
               </p>
@@ -201,7 +207,7 @@ export default function About() {
               </p>
             {selectedMember ? (
               <div className="text-center">
-                <img src={selectedMember.name === 'Charles Fiifi Hagan' ? `${import.meta.env.BASE_URL}ceo.jpg` : ''} alt={selectedMember.name} className="w-32 h-32 rounded-full mx-auto mb-6 border-2 border-teal-500" />
+                <img src={selectedMember.image} alt={selectedMember.name} className="w-32 h-32 rounded-full mx-auto mb-6 border-2 border-teal-500" />
                 <h3 className="text-2xl font-bold mb-4 text-cyan-300">{selectedMember.name}</h3>
                 <p className="text-teal-400 mb-4">{selectedMember.role}</p>
                 <p className="text-gray-300 leading-relaxed max-w-4xl mx-auto mb-6">{selectedMember.details}</p>
@@ -227,7 +233,7 @@ export default function About() {
                     onClick={() => handleMemberClick(member)}
                     className="text-center cursor-pointer hover:bg-gray-800 p-4 rounded-lg transition border border-teal-500/20 hover:border-teal-400/60"
                   >
-                    <img src={member.name === 'Charles Fiifi Hagan' ? `${import.meta.env.BASE_URL}ceo.jpg` : ''} alt={member.name} className="w-24 h-24 rounded-full mx-auto mb-4 border border-teal-500" />
+                    <img src={member.image} alt={member.name} className="w-24 h-24 rounded-full mx-auto mb-4 border border-teal-500" />
                     <h3 className="font-semibold text-cyan-300">{member.name}</h3>
                     <p className="text-gray-400 text-sm">{member.role}</p>
                     <p className="text-gray-500 text-xs mt-2">{member.description}</p>
@@ -251,7 +257,9 @@ export default function About() {
               }`}>{tabs[3].details}</p>
               {selectedMember ? (
                 <div className="text-center">
-                  <img src={`${import.meta.env.BASE_URL}${selectedMember.image}`} alt={selectedMember.name} className="w-32 h-32 rounded-full mx-auto mb-6 border-2 border-teal-500" />
+                  <img src={selectedMember.image} alt={selectedMember.name} className={`mx-auto mb-6 border-2 border-teal-500 rounded-full ${
+                    selectedMember.name === 'Ghana Digital Centres Limited' ? 'w-40 h-40' : 'w-32 h-32'
+                  }`} />
                   <h3 className="text-2xl font-bold mb-4 text-cyan-300">{selectedMember.name}</h3>
                   <p className="text-teal-400 mb-4">{selectedMember.role}</p>
                   <p className="text-gray-300 leading-relaxed max-w-4xl mx-auto mb-6">{selectedMember.details}</p>
@@ -277,7 +285,9 @@ export default function About() {
                       onClick={() => handleMemberClick(advisor)}
                       className="text-center cursor-pointer hover:bg-gray-800 p-4 rounded-lg transition border border-teal-500/20 hover:border-teal-400/60"
                     >
-                      <img src={`${import.meta.env.BASE_URL}${advisor.image}`} alt={advisor.name} className="w-24 h-24 rounded-full mx-auto mb-4 border border-teal-500" />
+                      <img src={advisor.image} alt={advisor.name} className={`mx-auto mb-4 border border-teal-500 rounded-full ${
+                        advisor.name === 'Ghana Digital Centres Limited' ? 'w-32 h-32' : 'w-24 h-24'
+                      }`} />
                       <h3 className="font-semibold text-cyan-300">{advisor.name}</h3>
                       <p className="text-gray-400 text-sm">{advisor.role}</p>
                     </div>

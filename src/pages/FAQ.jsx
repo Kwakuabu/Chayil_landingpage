@@ -44,12 +44,8 @@ export default function FAQ() {
         className="absolute inset-0 bg-cover bg-center bg-no-repeat -z-10"
         style={{ backgroundImage: `url('${import.meta.env.BASE_URL}images/background5.jpg')` }}
       />
-      {/* Overlay */}
-      <div
-        className={`absolute inset-0 transition-colors duration-500 ${
-          isDark ? 'bg-black bg-opacity-70' : 'bg-white bg-opacity-40'
-        } -z-5`}
-      />
+      {/* Overlay removed to show original background */}
+      <div className="absolute inset-0 bg-transparent -z-5" />
       {/* Main content */}
       <motion.section
         initial={{ opacity: 0, y: 40 }}

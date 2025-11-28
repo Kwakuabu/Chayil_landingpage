@@ -41,11 +41,13 @@ export default function Home() {
 
   return (
     <div
-      className="home-background min-h-screen bg-cover bg-center bg-no-repeat"
+      className="relative home-background min-h-screen bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: `url('${bgImage}')` }}
     >
-      <div className="text-center max-w-6xl mx-auto px-4 py-12 min-h-screen">
-        <h1 className="text-xl md:text-3xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 drop-shadow-lg">
+      {/* Overlay to give the background some opacity while preserving the image */}
+      <div className="absolute inset-0 bg-black/40 pointer-events-none" />
+      <div className="relative text-center max-w-6xl mx-auto px-4 py-12 min-h-screen z-10">
+        <h1 className="text-xl md:text-3xl font-extrabold mb-4 text-white drop-shadow-lg">
           Chayil SecureX - Africa&apos;s Trusted Partner in GRC & Cybersecurity
         </h1>
         <p className="text-white font-semibold mb-6 max-w-4xl mx-auto px-2">

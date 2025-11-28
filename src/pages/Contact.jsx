@@ -47,8 +47,8 @@ export default function Contact() {
         className="absolute inset-0 bg-cover bg-center bg-no-repeat -z-10"
         style={{ backgroundImage: `url('${import.meta.env.BASE_URL}images/background5.jpg')` }}
       />
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/50 -z-10"></div>
+      {/* Overlay (removed opacity to keep original background) */}
+      <div className="absolute inset-0 bg-transparent -z-10"></div>
       <motion.section
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
@@ -86,16 +86,17 @@ export default function Contact() {
             <h2 className="text-xl font-semibold text-teal-400 mb-4">Our Office</h2>
             <p className="text-gray-300 mb-2">Accra Digital Centre, Accra, Ghana</p>
             <p className="text-gray-300 mb-2">Email: <a href="mailto:info@chayilsecurex.com" className="text-teal-400">info@chayilsecurex.com</a></p>
-            <p className="text-gray-300 mb-4">Phone: <a href="tel:+233123456789" className="text-teal-400">+233 123 456 789</a></p>
+            <p className="text-gray-300 mb-4">Phone: <a href="tel:+233247881728" className="text-teal-400">+233247881728</a></p>
             <div className="mt-4">
               <a href="https://maps.google.com?q=Accra+Digital+Centre" target="_blank" rel="noreferrer" className="text-sm text-teal-400 underline">View on Google Maps</a>
             </div>
-            <div className="mt-6">
+            <div className="mt-6 text-center">
               <h3 className="text-sm text-gray-400 mb-2">Connect with us</h3>
-              <div className="flex space-x-3">
-                <a href="#" className="text-teal-400 hover:text-cyan-300">Twitter</a>
-                <a href="#" className="text-teal-400 hover:text-cyan-300">LinkedIn</a>
-                <a href="#" className="text-teal-400 hover:text-cyan-300">Facebook</a>
+              <div className="flex justify-center space-x-6">
+                <a href="https://twitter.com/ChayilSecureX" target="_blank" rel="noreferrer" aria-label="Twitter" className="text-teal-400 hover:text-cyan-300">Twitter</a>
+                <a href="https://www.linkedin.com/company/chayilsecurex" target="_blank" rel="noreferrer" aria-label="LinkedIn" className="text-teal-400 hover:text-cyan-300">LinkedIn</a>
+                <a href="https://www.facebook.com/ChayilSecureX" target="_blank" rel="noreferrer" aria-label="Facebook" className="text-teal-400 hover:text-cyan-300">Facebook</a>
+                <a href="https://www.instagram.com/chayilsecurex?igsh=MTdvdWI2a2Y2aDh5Zg==" target="_blank" rel="noreferrer" aria-label="Instagram" className="text-teal-400 hover:text-cyan-300">Instagram</a>
               </div>
             </div>
           </div>
