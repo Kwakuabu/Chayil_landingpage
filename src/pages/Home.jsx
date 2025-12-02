@@ -1,73 +1,97 @@
 import { useTheme } from '../context/ThemeContext'
 import { Link } from 'react-router-dom'
+import { useState } from 'react'
 
 const homeCards = [
   {
     to: '/services',
     title: 'Our Services',
     description: 'Explore our comprehensive GRC and cybersecurity solutions',
-    bgColor: 'bg-gray-800/50',
-    hoverBg: 'hover:bg-gray-700/50',
-    textColor: 'text-teal-400',
-    borderColor: 'border-teal-500/20',
-    hoverBorder: 'hover:border-teal-400/60',
   },
   {
     to: '/faq',
     title: 'FAQ',
     description: 'Find answers to common questions about our services',
-    bgColor: 'bg-gray-800/50',
-    hoverBg: 'hover:bg-gray-700/50',
-    textColor: 'text-teal-400',
-    borderColor: 'border-teal-500/20',
-    hoverBorder: 'hover:border-teal-400/60',
   },
   {
     to: '/contact',
     title: 'Contact Us',
     description: 'Get in touch for consultations and partnerships',
-    bgColor: 'bg-gray-800/50',
-    hoverBg: 'hover:bg-gray-700/50',
-    textColor: 'text-teal-400',
-    borderColor: 'border-teal-500/20',
-    hoverBorder: 'hover:border-teal-400/60',
   },
 ]
 
 export default function Home() {
   const { isDark } = useTheme()
+  const [email, setEmail] = useState('')
+  const [status, setStatus] = useState('idle')
+  const [message, setMessage] = useState('')
 
   const bgImage = `${import.meta.env.BASE_URL}images/background4.jpg`
 
+  // Newsletter submit
+  const handleNewsletter = () => {
+    const trimmed = email.trim()
+    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setStatus('error')
+      setMessage('Enter a valid email')
+      return
+    }
+
+    try {
+      const list = JSON.parse(localStorage.getItem('newsletter') || '[]')
+      if (!list.includes(trimmed)) list.push(trimmed)
+
+      localStorage.setItem('newsletter', JSON.stringify(list))
+      setEmail('')
+      setStatus('success')
+      setMessage('Subscribed!')
+      setTimeout(() => setStatus('idle'), 2000)
+    } catch {
+      setStatus('error')
+      setMessage('Something went wrong')
+    }
+  }
+
   return (
     <div
-      className="relative home-background min-h-screen bg-cover bg-center bg-no-repeat"
+      className="relative min-h-screen bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: `url('${bgImage}')` }}
     >
-      {/* Overlay to give the background some opacity while preserving the image */}
-      <div className="absolute inset-0 bg-black/40 pointer-events-none" />
-      <div className="relative text-center max-w-6xl mx-auto px-4 py-12 min-h-screen z-10">
-        <h1 className="text-xl md:text-3xl font-extrabold mb-4 text-white drop-shadow-lg">
-          Chayil SecureX - Africa&apos;s Trusted Partner in GRC & Cybersecurity
+      {/* Dim overlay */}
+      <div className="absolute inset-0 bg-black/50" />
+
+      <div className="relative z-10 max-w-6xl mx-auto px-4 py-16 text-center">
+        {/* Header */}
+        <h1 className="text-2xl md:text-4xl font-extrabold mb-6 text-teal-400 drop-shadow-lg leading-tight">
+          Chayil SecureX - Africa’s Trusted Partner in GRC & Cybersecurity
         </h1>
-        <p className="text-white font-semibold mb-6 max-w-4xl mx-auto px-2">
-          Chayil SecureX is a Governance, Risk & Compliance (GRC) and Cybersecurity Advisory firm headquartered at the Accra Digital Centre, Ghana. Positioned at the intersection of global security standards and Africa&apos;s emerging digital economy, we specialize in enabling governments, enterprises, and SMEs to build digital trust, comply with international and local regulations, and strengthen cyber resilience.
+
+        <p className="text-white font-medium max-w-4xl mx-auto mb-12 text-sm md:text-base leading-relaxed">
+          Chayil SecureX is a Governance, Risk & Compliance (GRC) and Cybersecurity Advisory firm headquartered at the Accra Digital Centre, Ghana. Positioned at the intersection of global security standards and Africa's emerging digital economy, we specialize in enabling governments, enterprises, and SMEs to build digital trust, comply with international and local regulations, and strengthen cyber resilience.
         </p>
-        {/* Get Started removed - no public signup/login links */}
+
+        {/* Card Section */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 px-2">
           {homeCards.map((card, index) => (
             <Link
               key={index}
               to={card.to}
-              className={`block p-8 ${card.bgColor} ${card.hoverBg} rounded-xl transition-all duration-300 text-center shadow-lg hover:shadow-xl transform hover:-translate-y-1 border ${card.borderColor} ${card.hoverBorder} hover:shadow-teal-500/20`}
+              className="
+                backdrop-blur-lg bg-white/10 border border-teal-500/20
+                p-8 rounded-2xl shadow-lg transition-all duration-300
+                hover:bg-white/20 hover:shadow-teal-400/20
+                hover:-translate-y-2 hover:border-teal-400/40
+              "
             >
-              <h3 className={`font-bold text-xl mb-3 ${card.textColor}`}>
+              <h3 className="text-xl font-bold text-teal-400 mb-3">
                 {card.title}
               </h3>
-              <p className="text-white leading-relaxed">{card.description}</p>
+              <p className="text-gray-200">{card.description}</p>
             </Link>
           ))}
         </div>
+
+        {/* Newsletter removed from Home (footer-only newsletter kept) */}
       </div>
     </div>
   )

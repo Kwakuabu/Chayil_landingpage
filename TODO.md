@@ -1,0 +1,2 @@
+- [x] Reduce footer height by changing py-14 to py-8 in Footer.jsx
+- [x] Make the header text flexible by removing whitespace-nowrap in Home.jsx

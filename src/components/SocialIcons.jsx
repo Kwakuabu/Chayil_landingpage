@@ -5,9 +5,9 @@ const socials = [
   { icon: <FaTwitter />, color: '#1da1f2', name: 'Twitter', href: 'https://x.com/chayilsecurex?s=21' },
   { icon: <FaLinkedin />, color: '#0a66c2', name: 'LinkedIn', href: 'https://www.linkedin.com/company/chayil-securex/' },
   { icon: <FaFacebook />, color: '#1877f2', name: 'Facebook', href: 'https://www.facebook.com/share/16Fugw5xgH/?mibextid=wwXIfr' },
-  { icon: <FaInstagram />, color: 'rgba(175, 27, 118, 1)', name: 'Instagram', href: '#' },
-  { icon: <FaEnvelope />, color: '#EA4335', name: 'Email', href: 'mailto:info@chayilsecurex.com' },
-  { icon: <FaPhone />, color: '#34A853', name: 'Phone', href: 'tel:+233123456789' },
+  { icon: <FaInstagram />, color: 'rgba(175, 27, 118, 1)', name: 'Instagram', href: 'https://www.instagram.com/chayilsecurex?igsh=MTdvdWI2a2Y2aDh5Zg==' },
+  { icon: <FaEnvelope />, color: '#EA4335', name: 'Email', href: 'mailto:chayilsecurex@gmail.com' },
+  { icon: <FaPhone />, color: '#34A853', name: 'Phone', href: 'tel:+233247881728' },
 ]
 
 export default function SocialIcons() {

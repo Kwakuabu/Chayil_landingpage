@@ -1,6 +1,7 @@
 import { Routes, Route, useLocation, Navigate, Link } from "react-router-dom";
-import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 
@@ -11,6 +12,9 @@ import Blog from "./pages/Blog";
 import FAQ from "./pages/FAQ";
 import CustomerService from "./pages/CustomerService";
 import Contact from "./pages/Contact";
+import Policy from "./pages/Policy";
+import TermsAndConditions from "./pages/TermsAndConditions";
+import CookiePolicy from "./pages/CookiePolicy";
 
 export default function App() {
   return (
@@ -22,7 +26,6 @@ export default function App() {
 
 function AppContent() {
   const location = useLocation();
-  // const { user, requires2FA } = useAuth();
   const isDashboard =
     location.pathname.includes("dashboard") || location.pathname === "/2fa";
 
@@ -31,7 +34,7 @@ function AppContent() {
       {!isDashboard && <Header />}
       <main className="flex-1">
         <Routes>
-          {/* Public routes */}
+          {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/services/:id" element={<Services />} />
@@ -40,16 +43,12 @@ function AppContent() {
           <Route path="/faq" element={<FAQ />} />
           <Route path="/customer-service" element={<CustomerService />} />
           <Route path="/contact" element={<Contact />} />
-          {/* Admin and client routes removed (not publicly hosted) */}
-          {/* Removed client/admin routes for deleted components */}
+          <Route path="/policy" element={<Policy />} />
+          <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+          <Route path="/cookie-policy" element={<CookiePolicy />} />
 
-          {/* Redirects */}
-          {/* <Route path="/dashboard" element={<DashboardRedirect />} /> */}
-
-          {/* Unauthorized */}
+          {/* Unauthorized / 404 */}
           <Route path="/unauthorized" element={<Unauthorized />} />
-
-          {/* Catch-all */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
@@ -58,48 +57,35 @@ function AppContent() {
   );
 }
 
-// Redirect user based on role
-function DashboardRedirect() {
-  const { user, requires2FA } = useAuth();
-
-  if (requires2FA) return <Navigate to="/2fa" replace />;
-  if (!user) return <Navigate to="/login" replace />;
-
-  switch (user.role) {
-    default:
-      return <Navigate to="/login" replace />;
-  }
-}
-
 // Unauthorized page
 function Unauthorized() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900/80">
-      <div className="bg-gray-800/95 p-8 rounded-lg shadow-lg text-center">
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 dark:bg-gray-950 transition-colors">
+      <div className="bg-gray-800/95 dark:bg-gray-900 p-8 rounded-lg shadow-lg text-center">
         <h2 className="text-2xl text-red-500 font-bold mb-4">Access Denied</h2>
-        <p className="text-gray-300 mb-6">
+        <p className="text-gray-300 dark:text-gray-200 mb-6">
           You don't have permission to view this page.
         </p>
         <Link
-          to="/dashboard"
+          to="/"
           className="text-teal-400 hover:text-cyan-300 font-semibold"
         >
-          Go to Dashboard
+          Go Home
         </Link>
       </div>
     </div>
   );
 }
 
-// 404 page
+// 404 Not Found page
 function NotFound() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900/80">
-      <div className="bg-gray-800/95 p-8 rounded-lg shadow-lg text-center">
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 dark:bg-gray-950 transition-colors">
+      <div className="bg-gray-800/95 dark:bg-gray-900 p-8 rounded-lg shadow-lg text-center">
         <h1 className="text-4xl text-red-400 font-bold mb-4">
           404 - Page Not Found
         </h1>
-        <p className="text-gray-300 mb-6">
+        <p className="text-gray-300 dark:text-gray-200 mb-6">
           Sorry, the page you are looking for does not exist.
         </p>
         <Link

@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
 
 const faqs = [
@@ -33,55 +34,63 @@ export default function FAQ() {
   const [openIndex, setOpenIndex] = useState(null)
   const { isDark } = useTheme()
 
-  const toggleFAQ = (index) => {
-    setOpenIndex(openIndex === index ? null : index)
-  }
+  const toggleFAQ = (index) => setOpenIndex(openIndex === index ? null : index)
 
   return (
     <div className="relative min-h-screen">
       {/* Background Image */}
       <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat -z-10"
+        className="absolute inset-0 bg-cover bg-center -z-10"
         style={{ backgroundImage: `url('${import.meta.env.BASE_URL}images/background5.jpg')` }}
       />
-      {/* Overlay removed to show original background */}
       <div className="absolute inset-0 bg-transparent -z-5" />
-      {/* Main content */}
+
+      {/* Main Content */}
       <motion.section
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}
-        className="relative text-center max-w-6xl mx-auto px-4 py-12 min-h-screen"
+        className="relative max-w-6xl mx-auto px-6 py-16"
       >
+        {/* Header */}
         <div className="max-w-4xl mx-auto mb-8 rounded-lg p-6 bg-gray-900 text-white border border-teal-500/20">
-          <h1 className="text-4xl font-bold mb-4 text-white">Frequently Asked Questions</h1>
-          <p className="text-gray-300 mb-0">
+          <h1 className="text-4xl font-bold mb-4 text-white text-center">Frequently Asked Questions</h1>
+          <p className="text-gray-300 text-center">
             Find answers to common questions about our services and approach.
           </p>
         </div>
+
+        {/* FAQ List */}
         <div className="max-w-3xl mx-auto space-y-4">
           {faqs.map((faq, i) => (
-            <motion.div key={i} className="bg-gray-900 text-gray-300 p-4 rounded-lg shadow-lg border border-teal-500/20">
+            <motion.div
+              key={i}
+              className="bg-gray-900 text-gray-300 p-4 rounded-lg shadow-lg border border-teal-500/20"
+            >
               <button
                 onClick={() => toggleFAQ(i)}
-                className={`w-full text-left font-semibold text-lg flex justify-between items-center transition ${isDark ? 'text-cyan-300 hover:text-cyan-200' : 'text-teal-400 hover:text-cyan-300'}`}
+                className="w-full text-left font-semibold text-lg flex justify-between items-center transition text-teal-400 hover:text-cyan-300"
               >
                 {faq.question}
                 <span className="text-2xl text-cyan-300">{openIndex === i ? '-' : '+'}</span>
               </button>
+
               {openIndex === i && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="text-gray-400 mt-4 text-left leading-relaxed"
+                  className="mt-4 text-left text-gray-400 leading-relaxed"
                 >
                   {faq.answer}
                   <div className="mt-4 pt-4 border-t border-teal-500/20">
                     <p className="text-sm text-gray-500 mb-2">Need more help?</p>
-                    <a href="/customer-service" className="text-teal-400 hover:text-cyan-300 transition text-sm underline">
+                    <Link
+                      to="/customer-service"
+                      className="text-teal-400 hover:text-cyan-300 transition text-sm underline"
+                    >
                       Contact Customer Service
-                    </a>
+                    </Link>
                   </div>
                 </motion.div>
               )}

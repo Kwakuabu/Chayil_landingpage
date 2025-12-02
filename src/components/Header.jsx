@@ -12,7 +12,7 @@ export default function Header() {
     { name: "Home", path: "/" },
     { name: "Services", path: "/services" },
     { name: "About Us", path: "/about" },
-    { name: "Explore", path: "/" },
+    // ❌ Explore removed
     { name: "FAQ", path: "/faq" },
     { name: "Customer Service", path: "/customer-service" },
     { name: "Blog", path: "/blog" },
@@ -47,6 +47,7 @@ export default function Header() {
                 {item.name}
               </Link>
             ))}
+
             {/* Dark Mode Toggle */}
             <button
               onClick={toggleTheme}
@@ -114,7 +115,8 @@ export default function Header() {
                 {item.name}
               </Link>
             ))}
-            {/* Dark Mode Toggle for Mobile */}
+
+            {/* Dark Mode Toggle Mobile */}
             <button
               onClick={toggleTheme}
               className="block py-2 mt-2 p-2 rounded-full bg-teal-500 text-black hover:bg-teal-400 transition-colors"
