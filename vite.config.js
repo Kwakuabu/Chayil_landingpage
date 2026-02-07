@@ -4,5 +4,5 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/Chayil_landingpage/',
+  base: '/',  // Changed from '/Chayil_landingpage/' to '/'
 })
